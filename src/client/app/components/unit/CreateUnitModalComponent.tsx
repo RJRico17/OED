@@ -15,6 +15,7 @@ import { tooltipBaseStyle } from '../../styles/modalStyle';
 import { unitsApi } from '../../redux/api/unitsApi';
 import { useTranslate } from '../../redux/componentHooks';
 import { showSuccessNotification, showErrorNotification } from '../../utils/notifications';
+import { LineGraphRates } from '../../types/redux/graph';
 
 /**
  * Defines the create unit modal form
@@ -242,11 +243,13 @@ export default function CreateUnitModalComponent() {
 							<Input
 								id='secInRate'
 								name='secInRate'
-								type='number'
+								type='select'
 								onChange={e => handleNumberChange(e)}
-								defaultValue={state.secInRate}
-								min='1'
-								invalid={state.secInRate <= 0} />
+								value={state.secInRate}>
+								{Object.keys(LineGraphRates).map(key => {
+									return (<option value={LineGraphRates[key]} key={key}>{translate(`per.${key}`)}</option>);
+								})}
+							</Input>
 							<FormFeedback>
 								<FormattedMessage id="error.greater" values={{ min: '0' }} />
 							</FormFeedback>
