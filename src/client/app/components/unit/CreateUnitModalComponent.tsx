@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Button, Col, Container, FormFeedback, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row } from 'reactstrap';
@@ -241,14 +240,20 @@ export default function CreateUnitModalComponent() {
 						<Col><FormGroup>
 							<Label for='secInRate'>{translate('unit.sec.in.rate')}</Label>
 							<Input
-								id='secInRate'
-								name='secInRate'
-								type='select'
+								id="secInRate"
+								name="secInRate"
+								type="select"
 								onChange={e => handleNumberChange(e)}
-								value={state.secInRate}>
-								{Object.keys(LineGraphRates).map(key => {
-									return (<option value={LineGraphRates[key]} key={key}>{translate(`per.${key}`)}</option>);
-								})}
+								value={state.secInRate}
+							>
+								{Object.entries(LineGraphRates).map(
+									([rateKey, rateValue]) => (
+										<option value={rateValue * defaultValues.secInRate} key={rateKey}>
+											{translate(rateKey)}
+										</option>
+									)
+								)}
+								<option value={'0'}>{translate('custom.value')}</option>
 							</Input>
 							<FormFeedback>
 								<FormattedMessage id="error.greater" values={{ min: '0' }} />
