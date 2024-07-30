@@ -4,13 +4,13 @@
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import {Button,Col,Container,FormFeedback,FormGroup,Input,Label,Modal,ModalBody,ModalFooter,ModalHeader,Row} from 'reactstrap';
+import { Button, Col, Container, FormFeedback, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row} from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import '../../styles/modal.css';
 import { TrueFalseType } from '../../types/items';
 import TooltipMarkerComponent from '../TooltipMarkerComponent';
 import TooltipHelpComponent from '../../components/TooltipHelpComponent';
-import {UnitRepresentType,DisplayableType,UnitType} from '../../types/redux/units';
+import { UnitRepresentType, DisplayableType, UnitType} from '../../types/redux/units';
 import { tooltipBaseStyle } from '../../styles/modalStyle';
 import { unitsApi } from '../../redux/api/unitsApi';
 import { useTranslate } from '../../redux/componentHooks';
@@ -59,9 +59,9 @@ export default function CreateUnitModalComponent() {
 	};
 	const CUSTOM_INPUT = '-99';
 	//the state that updates the drop down menu selection for the standard values
-	const [rate, setRate] = useState('');
+	const [rate, setRate] = useState('1');
 	// Holds the value during custom value input and it is separate from standard choices.
-	const [customRate, setCustomRate] = useState(0);
+	const [customRate, setCustomRate] = useState(1);
 	// True if custom value input is active.
 	const [showCustomInput, setShowCustomInput] = useState(false);
 	//function that response to a change in secInRate
@@ -122,6 +122,9 @@ export default function CreateUnitModalComponent() {
         (state.typeOfUnit !== UnitType.suffix || state.suffix !== '')
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
+	const customRateValid = (barDays: number) => {
+		return Number.isInteger(barDays) && barDays >= 1;
+	};
 	/* End State */
 	// Reset the state to default values
 	const resetState = () => {
@@ -366,6 +369,7 @@ export default function CreateUnitModalComponent() {
 									{showCustomInput && (
 										<>
 											<Label for="customRate">
+												{/* TODO translate into diff languages */}
 												{translate('unit.sec.in.rate.enter')}
 											</Label>
 											<Input
@@ -373,6 +377,8 @@ export default function CreateUnitModalComponent() {
 												name="customRate"
 												type="number"
 												value={customRate}
+												min={1}
+												invalid={!customRateValid(customRate)}
 												onKeyDown={e => handleEnter(e.key)}
 												onChange={e => handleCustomRateChange(e)}
 											/>
@@ -381,7 +387,7 @@ export default function CreateUnitModalComponent() {
 									<FormFeedback>
 										<FormattedMessage
 											id="error.greater"
-											values={{ min: '0' }}
+											values={{ min: '1' }}
 										/>
 									</FormFeedback>
 								</FormGroup>
