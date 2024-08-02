@@ -85,7 +85,6 @@ export default function CreateUnitModalComponent() {
 		// Check if the custom value option is selected
 		if (value === CUSTOM_INPUT) {
 			setRate(CUSTOM_INPUT);
-			setCustomRate(Number(rate));
 			setShowCustomInput(true);
 		} else {
 			setRate(value);
@@ -100,14 +99,7 @@ export default function CreateUnitModalComponent() {
 	const handleCustomRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
 		setCustomRate(Number(value));
-		console.log('this is the handleCustomRateChange :  ' + value);
-		//setShowCustomInput(false);
-	};
-	const handleEnter = (key: string) => {
-		if (key === 'Enter') {
-			setState({ ...state, secInRate: Number(customRate) });
-			//setShowCustomInput(false);
-		}
+		setState({ ...state, secInRate: Number(customRate) });
 	};
 	/* Create Unit Validation:
         Name cannot be blank
@@ -379,7 +371,6 @@ export default function CreateUnitModalComponent() {
 												value={customRate}
 												min={1}
 												invalid={!customRateValid(customRate)}
-												onKeyDown={e => handleEnter(e.key)}
 												onChange={e => handleCustomRateChange(e)}
 											/>
 										</>
