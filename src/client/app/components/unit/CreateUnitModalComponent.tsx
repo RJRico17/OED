@@ -58,10 +58,11 @@ export default function CreateUnitModalComponent() {
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
 	};
 	const CUSTOM_INPUT = '-99';
-	//the state that updates the drop down menu selection for the standard values
-	const [rate, setRate] = useState('1');
+	// Sets the starting rate for secInRate box, value of 3600 is chosen as default to result in Hour as default in dropdown box.
+	const [rate, setRate] = useState('3600');
 	// Holds the value during custom value input and it is separate from standard choices.
 	const [customRate, setCustomRate] = useState(1);
+	// This should set customRate's data to
 	// True if custom value input is active.
 	const [showCustomInput, setShowCustomInput] = useState(false);
 	//function that response to a change in secInRate
@@ -93,9 +94,6 @@ export default function CreateUnitModalComponent() {
 			setShowCustomInput(false);
 		}
 	};
-	// const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-	//    setState({ ...state, [e.target.name]: Number(e.target.value) });
-	// };
 	const handleCustomRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
 		setCustomRate(Number(value));
@@ -110,10 +108,11 @@ export default function CreateUnitModalComponent() {
 	useEffect(() => {
 		setValidUnit(
 			state.name !== '' &&
-        state.secInRate > 0 &&
-        (state.typeOfUnit !== UnitType.suffix || state.suffix !== '')
+        state.secInRate > 0 && Number.isInteger(Number(state.secInRate)) && (state.typeOfUnit !== UnitType.suffix
+		|| state.suffix !== '')
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
+
 	const customRateValid = (barDays: number) => {
 		return Number.isInteger(barDays) && barDays >= 1;
 	};
@@ -346,11 +345,14 @@ export default function CreateUnitModalComponent() {
 										name="secInRate"
 										type="select"
 										onChange={e => handleNumberChange(e)}
-										value={rate}>
+										value={rate}
+										defaultValue="Hour"
+									>
 										{Object.entries(LineGraphRates).map(
 											([rateKey, rateValue]) => (
 												<option value={rateValue * 3600} key={rateKey}>
 													{translate(rateKey)}
+													{/* Testing default change */}
 												</option>
 											)
 										)}
