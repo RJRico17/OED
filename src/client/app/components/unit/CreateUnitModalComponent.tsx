@@ -34,6 +34,7 @@ export default function CreateUnitModalComponent() {
 		secInRate: 3600,
 		suffix: '',
 		note: '',
+		defaultValue: '1',
 		// These two values are necessary but are not used.
 		// The client code makes the id for the selected unit and default graphic unit be -99
 		// so it can tell it is not yet assigned and do the correct logic for that case.
@@ -62,6 +63,8 @@ export default function CreateUnitModalComponent() {
 	const [rate, setRate] = useState('3600');
 	// Holds the value during custom value input and it is separate from standard choices.
 	const [customRate, setCustomRate] = useState(1);
+	// should only update customrate when save all is clicked
+	// This should keep track of rate's value and set custom rate equal to it when csutom rate is clicked
 	// This should set customRate's data to
 	// True if custom value input is active.
 	const [showCustomInput, setShowCustomInput] = useState(false);
@@ -74,23 +77,23 @@ export default function CreateUnitModalComponent() {
 	//     setCustomRate(isCustom ? CUSTOM_INPUT : state.secInRate.toString());
 	//   }, [state.secInRate]);
 	/*
-    UI events:
-        - When the user selects a new rate from the dropdown,`rate` is updated.
-        - If the user selects the custom value option, `showCustomInput` is set to true.
-        - When the user enters a custom value, `customRate` is updated.
-        - The initial value of `customRate` is set to the previously chosen value of `rate`
-        - Make sure that when submit button is clicked, that the state.secInRate is set to the correct value.
+	UI events:
+		- When the user selects a new rate from the dropdown,`rate` is updated.
+		- If the user selects the custom value option, `showCustomInput` is set to true.
+		- When the user enters a custom value, `customRate` is updated.
+		- The initial value of `customRate` is set to the previously chosen value of `rate`
+		- Make sure that when submit button is clicked, that the state.secInRate is set to the correct value.
   */
 	const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
 		// Check if the custom value option is selected
 		if (value === CUSTOM_INPUT) {
 			setRate(CUSTOM_INPUT);
+			setCustomRate(Number(rate));
 			setShowCustomInput(true);
 		} else {
 			setRate(value);
 			setState({ ...state, [e.target.name]: Number(value) });
-			//setState({ ...state, secInRate: Number(value) });
 			setShowCustomInput(false);
 		}
 	};
@@ -100,26 +103,33 @@ export default function CreateUnitModalComponent() {
 		setState({ ...state, secInRate: Number(customRate) });
 	};
 	/* Create Unit Validation:
-        Name cannot be blank
-        Sec in Rate must be greater than zero
-        If type of unit is suffix their must be a suffix
-    */
+		Name cannot be blank
+		Sec in Rate must be greater than zero
+		If type of unit is suffix their must be a suffix
+	*/
 	const [validUnit, setValidUnit] = useState(false);
 	useEffect(() => {
+		console.log(state.secInRate);
 		setValidUnit(
-			state.name !== '' &&
-        state.secInRate > 0 && Number.isInteger(Number(state.secInRate)) && (state.typeOfUnit !== UnitType.suffix
-		|| state.suffix !== '')
+			state.name !== '' && Number.isInteger(Number(state.secInRate)) && Number(state.secInRate) >= 1 && (state.typeOfUnit !== UnitType.suffix
+			|| state.suffix !== '')
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
 
-	const customRateValid = (barDays: number) => {
-		return Number.isInteger(barDays) && barDays >= 1;
+	const customRateValid = (customRate: number) => {
+		return Number.isInteger(customRate) && customRate >= 1;
 	};
 	/* End State */
 	// Reset the state to default values
 	const resetState = () => {
 		setState(defaultValues);
+		resetCustomRate();
+	};
+	// Helper function to reset custom rate interval box.
+	const resetCustomRate = () => {
+		setCustomRate(1);
+		setRate('3600');
+		setShowCustomInput(false);
 	};
 	// Unlike edit, we decided to discard inputs when you choose to leave the page. The reasoning is
 	// that create starts from an empty template.
@@ -129,11 +139,11 @@ export default function CreateUnitModalComponent() {
 		setShowModal(false);
 		// Set default identifier as name if left blank
 		state.identifier =
-      !state.identifier || state.identifier.length === 0 ? state.name: state.identifier;
+	!state.identifier || state.identifier.length === 0 ? state.name: state.identifier;
 		// set displayable to none if unit is meter
 		if (
 			state.typeOfUnit == UnitType.meter &&
-      state.displayable != DisplayableType.none
+	state.displayable != DisplayableType.none
 		) {
 			state.displayable = DisplayableType.none;
 		}
@@ -283,7 +293,7 @@ export default function CreateUnitModalComponent() {
 										value={state.displayable}
 										invalid={
 											state.displayable != DisplayableType.none &&
-                      (state.typeOfUnit == UnitType.meter || state.suffix != '')
+				(state.typeOfUnit == UnitType.meter || state.suffix != '')
 										}
 									>
 										{Object.keys(DisplayableType).map(key => {
@@ -293,8 +303,8 @@ export default function CreateUnitModalComponent() {
 													key={key}
 													disabled={
 														(state.typeOfUnit == UnitType.meter ||
-                              state.suffix != '') &&
-                            key != DisplayableType.none
+						state.suffix != '') &&
+							key != DisplayableType.none
 													}
 												>
 													{translate(`DisplayableType.${key}`)}
@@ -304,7 +314,7 @@ export default function CreateUnitModalComponent() {
 									</Input>
 									<FormFeedback>
 										{state.displayable !== DisplayableType.none &&
-                    state.typeOfUnit == UnitType.meter ? (
+					state.typeOfUnit == UnitType.meter ? (
 												<FormattedMessage id="error.displayable.meter" />
 											) : (
 												<FormattedMessage id="error.displayable.suffix.input" />
@@ -346,13 +356,11 @@ export default function CreateUnitModalComponent() {
 										type="select"
 										onChange={e => handleNumberChange(e)}
 										value={rate}
-										defaultValue="Hour"
 									>
 										{Object.entries(LineGraphRates).map(
 											([rateKey, rateValue]) => (
 												<option value={rateValue * 3600} key={rateKey}>
 													{translate(rateKey)}
-													{/* Testing default change */}
 												</option>
 											)
 										)}
@@ -398,7 +406,7 @@ export default function CreateUnitModalComponent() {
 										value={state.suffix}
 										invalid={
 											state.typeOfUnit === UnitType.suffix &&
-                      state.suffix === ''
+					state.suffix === ''
 										}
 									/>
 									<FormFeedback>
