@@ -21,6 +21,7 @@ import { conversionArrow } from '../../utils/conversionArrow';
 import { showErrorNotification, showSuccessNotification } from '../../utils/notifications';
 import ConfirmActionModalComponent from '../ConfirmActionModalComponent';
 import TooltipMarkerComponent from '../TooltipMarkerComponent';
+import { LineGraphRates } from '../../types/redux/graph';
 
 interface EditUnitModalComponentProps {
 	show: boolean;
@@ -40,6 +41,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	const [submitEditedUnit] = unitsApi.useEditUnitMutation();
 	const [deleteUnit] = unitsApi.useDeleteUnitMutation();
 	const translate = useTranslate();
+	const CUSTOM_INPUT = '-99';
 
 	// Set existing unit values
 	const values = { ...props.unit };
@@ -47,6 +49,9 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	/* State */
 	// Handlers for each type of input change
 	const [state, setState] = useState(values);
+	const [customRate, setCustomRate] = useState(1);
+	const [showCustomInput, setShowCustomInput] = useState(false);
+	const [rate, setRate] = useState(String(values.secInRate));
 	const conversionData = useAppSelector(selectConversionsDetails);
 	const meterDataByID = useAppSelector(selectMeterDataById);
 	const unitDataByID = useAppSelector(selectUnitDataById);
@@ -59,10 +64,33 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
 	};
 
+
+	/* vestigial code
 	const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setState({ ...state, [e.target.name]: Number(e.target.value) });
 	};
-
+	*/
+	const handleCustomNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		// Check if the custom value option is selected
+		if (value === CUSTOM_INPUT) {
+			setRate(CUSTOM_INPUT);
+			setCustomRate(Number(rate));
+			setShowCustomInput(true);
+		} else {
+			setRate(value);
+			setState({ ...state, [e.target.name]: Number(value) });
+			setShowCustomInput(false);
+		}
+	};
+	const handleCustomRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		setCustomRate(Number(value));
+		setState({ ...state, secInRate: Number(value) });
+	};
+	const customRateValid = (customRate: number) => {
+		return Number.isInteger(customRate) && customRate >= 1;
+	};
 	/* Confirm Delete Modal */
 	// Separate from state comment to keep everything related to the warning confirmation modal together
 	const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
@@ -140,8 +168,8 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	*/
 	const [validUnit, setValidUnit] = useState(false);
 	useEffect(() => {
-		setValidUnit(state.name !== '' && state.secInRate > 0 &&
-			(state.typeOfUnit !== UnitType.suffix || state.suffix !== ''));
+		setValidUnit(state.name !== '' && customRateValid(Number(customRate)) &&
+		(state.typeOfUnit !== UnitType.suffix || state.suffix !== ''));
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
 	/* End State */
 
@@ -152,6 +180,13 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	// Failure to edit units will not trigger a re-render, as no state has changed. Therefore, we must manually reset the values
 	const resetState = () => {
 		setState(values);
+		resetCustomRate();
+	};
+
+	const resetCustomRate = () => {
+		setRate(String(values.secInRate));
+		setCustomRate(Number(values.secInRate));
+		setShowCustomInput(false);
 	};
 
 	const handleShow = () => {
@@ -162,7 +197,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		props.handleClose();
 		resetState();
 	};
-
 	// Validate the changes and return true if we should update this unit.
 	// Two reasons for not updating the unit:
 	//	1. typeOfUnit is changed from meter to something else while some meters are still linked with this unit
@@ -392,12 +426,38 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 							<Input
 								id='secInRate'
 								name='secInRate'
-								type='number'
-								defaultValue={state.secInRate}
-								onChange={e => handleNumberChange(e)}
-								placeholder='Sec In Rate'
-								min='1'
-								invalid={state.secInRate <= 0} />
+								type='select'
+								value={rate}
+								onChange={e => handleCustomNumberChange(e)}
+								placeholder='Sec In Rate'>
+								{Object.entries(LineGraphRates).map(
+									([rateKey, rateValue]) => (
+										<option value={rateValue * 3600} key={rateKey}>
+											{translate(rateKey)}
+										</option>
+									)
+								)}
+								<option value={CUSTOM_INPUT}>
+									{translate('custom.value')}
+								</option>
+							</Input>
+							{showCustomInput && (
+								<>
+									<Label for="customRate">
+										{/* TODO translate into diff languages */}
+										{translate('unit.sec.in.rate.enter')}
+									</Label>
+									<Input
+										id="customRate"
+										name="customRate"
+										type="number"
+										value={customRate}
+										min={1}
+										invalid={!customRateValid(customRate)}
+										onChange={e => handleCustomRateChange(e)}
+									/>
+								</>
+							)}
 							<FormFeedback>
 								<FormattedMessage id="error.greater" values={{ min: '0' }} />
 							</FormFeedback>
