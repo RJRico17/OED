@@ -38,8 +38,12 @@ export default function PreferencesComponent() {
 		setLocalAdminPref({ ...localAdminPref, [key]: value });
 	};
 
+	const discardChanges = () => {
+		setLocalAdminPref(cloneDeep(adminPreferences));
+	};
+
 	return (
-		<div>
+		<div className='d-flex flex-column '>
 			<UnsavedWarningComponent
 				hasUnsavedChanges={hasChanges}
 				changes={localAdminPref}
@@ -47,20 +51,9 @@ export default function PreferencesComponent() {
 				successMessage='updated.preferences'
 				failureMessage='failed.to.submit.changes'
 			/>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.site.title')}:`}
-				</p>
-				<Input
-					type='text'
-					placeholder={translate('name')}
-					value={localAdminPref.displayTitle}
-					onChange={e => makeLocalChanges('displayTitle', e.target.value)}
-					maxLength={50}
-				/>
-			</div>
+			<h3 className='border-bottom'>{translate('graph.settings')}</h3>
 			<div>
-				<p style={labelStyle}>
+				<p className='mt-2' style={labelStyle}>
 					<FormattedMessage id='default.graph.type' />:
 				</p>
 				{
@@ -81,7 +74,7 @@ export default function PreferencesComponent() {
 					))
 				}
 			</div>
-			<p style={labelStyle}>
+			<p className='mt-2' style={labelStyle}>
 				<FormattedMessage id='default.graph.settings' />:
 			</p>
 			<div className='checkbox'>
@@ -108,7 +101,7 @@ export default function PreferencesComponent() {
 				</label>
 			</div>
 			<div>
-				<p style={labelStyle}>
+				<p className='mt-2' style={labelStyle}>
 					{translate('default.area.unit')}
 
 				</p>
@@ -139,8 +132,112 @@ export default function PreferencesComponent() {
 					</label>
 				</div>
 			</div>
+
+			<h3 className='border-bottom mt-3'>{translate('meter.settings')}</h3>
 			<div>
-				<p style={labelStyle}>
+				<p style={titleStyle}>
+					{`${translate('default.meter.reading.frequency')}:`}
+				</p>
+				<Input
+					type='text'
+					value={localAdminPref.defaultMeterReadingFrequency}
+					onChange={e => makeLocalChanges('defaultMeterReadingFrequency', e.target.value)}
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.minimum.value')}:`}
+				</p>
+				<Input
+					type='number'
+					value={localAdminPref.defaultMeterMinimumValue}
+					onChange={e => makeLocalChanges('defaultMeterMinimumValue', e.target.value)}
+					maxLength={50}
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.maximum.value')}:`}
+				</p>
+				<Input
+					type='number'
+					value={localAdminPref.defaultMeterMaximumValue}
+					onChange={e => makeLocalChanges('defaultMeterMaximumValue', e.target.value)}
+					maxLength={50}
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.minimum.date')}:`}
+				</p>
+				<Input
+					type='text'
+					value={localAdminPref.defaultMeterMinimumDate}
+					onChange={e => makeLocalChanges('defaultMeterMinimumDate', e.target.value)}
+					placeholder='YYYY-MM-DD HH:MM:SS'
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.maximum.date')}:`}
+				</p>
+				<Input
+					type='text'
+					value={localAdminPref.defaultMeterMaximumDate}
+					onChange={e => makeLocalChanges('defaultMeterMaximumDate', e.target.value)}
+					placeholder='YYYY-MM-DD HH:MM:SS'
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.reading.gap')}:`}
+				</p>
+				<Input
+					type='number'
+					value={localAdminPref.defaultMeterReadingGap}
+					onChange={e => makeLocalChanges('defaultMeterReadingGap', e.target.value)}
+					maxLength={50}
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.maximum.errors')}:`}
+				</p>
+				<Input
+					type='number'
+					value={localAdminPref.defaultMeterMaximumErrors}
+					onChange={e => makeLocalChanges('defaultMeterMaximumErrors', e.target.value)}
+					maxLength={50}
+				/>
+			</div>
+			<div>
+				<p className='mt-2' style={titleStyle}>
+					{`${translate('default.meter.disable.checks')}:`}
+				</p>
+				<Input
+					type='select'
+					value={localAdminPref.defaultMeterDisableChecks?.toString()}
+					onChange={e => makeLocalChanges('defaultMeterDisableChecks', e.target.value)}>
+					{Object.keys(TrueFalseType).map(key => {
+						return (<option value={key} key={key}>{translate(`TrueFalseType.${key}`)}</option>);
+					})}
+				</Input>
+			</div>
+			<div>
+				<h3 className='border-bottom mt-3'>{translate('site.settings')}</h3>
+				<div>
+					<p className='mt-2' style={titleStyle}>
+						{`${translate('site.title')}:`}
+					</p>
+					<Input
+						type='text'
+						placeholder={translate('name')}
+						value={localAdminPref.displayTitle}
+						onChange={e => makeLocalChanges('displayTitle', e.target.value)}
+						maxLength={50}
+					/>
+				</div>
+				<p className='mt-2' style={labelStyle}>
 					{translate('default.language')}
 				</p>
 				<div className='radio'>
@@ -183,16 +280,16 @@ export default function PreferencesComponent() {
 					</label>
 				</div>
 			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
+			<div>
+				<p className='mt-2' style={titleStyle}>
 					{`${translate('default.time.zone')}:`}
 				</p>
 				<TimeZoneSelect
 					current={localAdminPref.defaultTimezone}
 					handleClick={e => makeLocalChanges('defaultTimezone', e)} />
 			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
+			<div>
+				<p className='mt-2' style={titleStyle}>
 					{`${translate('default.warning.file.size')}:`}
 				</p>
 				<Input
@@ -202,8 +299,8 @@ export default function PreferencesComponent() {
 					maxLength={50}
 				/>
 			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
+			<div>
+				<p className='mt-2' style={titleStyle}>
 					{`${translate('default.file.size.limit')}:`}
 				</p>
 				<Input
@@ -213,97 +310,8 @@ export default function PreferencesComponent() {
 					maxLength={50}
 				/>
 			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.reading.frequency')}:`}
-				</p>
-				<Input
-					type='text'
-					value={localAdminPref.defaultMeterReadingFrequency}
-					onChange={e => makeLocalChanges('defaultMeterReadingFrequency', e.target.value)}
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.minimum.value')}:`}
-				</p>
-				<Input
-					type='number'
-					value={localAdminPref.defaultMeterMinimumValue}
-					onChange={e => makeLocalChanges('defaultMeterMinimumValue', e.target.value)}
-					maxLength={50}
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.maximum.value')}:`}
-				</p>
-				<Input
-					type='number'
-					value={localAdminPref.defaultMeterMaximumValue}
-					onChange={e => makeLocalChanges('defaultMeterMaximumValue', e.target.value)}
-					maxLength={50}
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.minimum.date')}:`}
-				</p>
-				<Input
-					type='text'
-					value={localAdminPref.defaultMeterMinimumDate}
-					onChange={e => makeLocalChanges('defaultMeterMinimumDate', e.target.value)}
-					placeholder='YYYY-MM-DD HH:MM:SS'
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.maximum.date')}:`}
-				</p>
-				<Input
-					type='text'
-					value={localAdminPref.defaultMeterMaximumDate}
-					onChange={e => makeLocalChanges('defaultMeterMaximumDate', e.target.value)}
-					placeholder='YYYY-MM-DD HH:MM:SS'
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.reading.gap')}:`}
-				</p>
-				<Input
-					type='number'
-					value={localAdminPref.defaultMeterReadingGap}
-					onChange={e => makeLocalChanges('defaultMeterReadingGap', e.target.value)}
-					maxLength={50}
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.maximum.errors')}:`}
-				</p>
-				<Input
-					type='number'
-					value={localAdminPref.defaultMeterMaximumErrors}
-					onChange={e => makeLocalChanges('defaultMeterMaximumErrors', e.target.value)}
-					maxLength={50}
-				/>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
-					{`${translate('default.meter.disable.checks')}:`}
-				</p>
-				<Input
-					type='select'
-					value={localAdminPref.defaultMeterDisableChecks?.toString()}
-					onChange={e => makeLocalChanges('defaultMeterDisableChecks', e.target.value)}>
-					{Object.keys(TrueFalseType).map(key => {
-						return (<option value={key} key={key}>{translate(`TrueFalseType.${key}`)}</option>);
-					})}
-				</Input>
-			</div>
-			<div style={bottomPaddingStyle}>
-				<p style={titleStyle}>
+			<div>
+				<p className='mt-2' style={titleStyle}>
 					<FormattedMessage id='default.help.url' />:
 				</p>
 				<Input
@@ -312,22 +320,32 @@ export default function PreferencesComponent() {
 					onChange={e => makeLocalChanges('defaultHelpUrl', e.target.value)}
 				/>
 			</div>
-			<Button
-				type='submit'
-				onClick={() =>
-					submitPreferences(localAdminPref)
-						.unwrap()
-						.then(() => {
-							showSuccessNotification(translate('updated.preferences'));
-						})
-						.catch(() => {
-							showErrorNotification(translate('failed.to.submit.changes'));
-						})
-				}
-				disabled={!hasChanges}
-			>
-				{translate('submit')}
-			</Button>
+			<div className='d-flex justify-content-end mt-3'>
+				<Button
+					type='button'
+					onClick={discardChanges}
+					disabled={!hasChanges}
+					style={{ marginRight: '20px' }}
+				>
+					{translate('discard.changes')}
+				</Button>
+				<Button
+					type='submit'
+					onClick={() =>
+						submitPreferences(localAdminPref)
+							.unwrap()
+							.then(() => {
+								showSuccessNotification(translate('updated.preferences'));
+							})
+							.catch(() => {
+								showErrorNotification(translate('failed.to.submit.changes'));
+							})
+					}
+					disabled={!hasChanges}
+				>
+					{translate('submit')}
+				</Button>
+			</div>
 		</div >
 	);
 }
@@ -335,9 +353,6 @@ export default function PreferencesComponent() {
 const labelStyle: React.CSSProperties = {
 	fontWeight: 'bold',
 	margin: 0
-};
-const bottomPaddingStyle: React.CSSProperties = {
-	paddingBottom: '15px'
 };
 
 const titleStyle: React.CSSProperties = {

@@ -54,10 +54,12 @@ export default function HeaderButtonsComponent() {
 		// The should ones tell if see but not selectable.
 		shouldHomeButtonDisabled: true,
 		shouldAdminButtonDisabled: true,
+		shouldUsersButtonDisabled: true,
 		shouldGroupsButtonDisabled: true,
 		shouldMetersButtonDisabled: true,
 		shouldMapsButtonDisabled: true,
-		shouldCSVButtonDisabled: true,
+		shouldCSVMetersButtonDisabled: true,
+		shouldCSVReadingsButtonDisabled: true,
 		shouldUnitsButtonDisabled: true,
 		shouldConversionsButtonDisabled: true,
 		// Translated menu title that depend on whether logged in.
@@ -88,10 +90,12 @@ export default function HeaderButtonsComponent() {
 			...prevState,
 			shouldHomeButtonDisabled: pathname === '/',
 			shouldAdminButtonDisabled: pathname === '/admin',
+			shouldUsersButtonDisabled: pathname === '/users',
 			shouldGroupsButtonDisabled: pathname === '/groups',
 			shouldMetersButtonDisabled: pathname === '/meters',
 			shouldMapsButtonDisabled: pathname === '/maps',
-			shouldCSVButtonDisabled: pathname === '/csv',
+			shouldCSVMetersButtonDisabled: pathname === '/csvMeters',
+			shouldCSVReadingsButtonDisabled: pathname === '/csvReadings',
 			shouldUnitsButtonDisabled: pathname === '/units',
 			shouldConversionsButtonDisabled: pathname === '/conversions'
 		}));
@@ -171,11 +175,18 @@ export default function HeaderButtonsComponent() {
 								<FormattedMessage id='conversions' />
 							</DropdownItem>
 							<DropdownItem
-								style={state.csvViewableLinkStyle}
-								disabled={state.shouldCSVButtonDisabled}
+								style={state.adminViewableLinkStyle}
+								disabled={state.shouldCSVMetersButtonDisabled}
 								tag={Link}
-								to="/csv">
-								<FormattedMessage id='csv' />
+								to="/csvMeters">
+								<FormattedMessage id='csvMeters' />
+							</DropdownItem>
+							<DropdownItem
+								style={state.csvViewableLinkStyle}
+								disabled={state.shouldCSVReadingsButtonDisabled}
+								tag={Link}
+								to="/csvReadings">
+								<FormattedMessage id='csvReadings' />
 							</DropdownItem>
 							<DropdownItem
 								disabled={state.shouldGroupsButtonDisabled}
@@ -209,7 +220,14 @@ export default function HeaderButtonsComponent() {
 								disabled={state.shouldAdminButtonDisabled}
 								tag={Link}
 								to="/admin">
-								<FormattedMessage id='admin.panel' />
+								<FormattedMessage id='admin.settings' />
+							</DropdownItem>
+							<DropdownItem
+								style={state.adminViewableLinkStyle}
+								disabled={state.shouldUsersButtonDisabled}
+								tag={Link}
+								to="/users">
+								<FormattedMessage id='users' />
 							</DropdownItem>
 							<DropdownItem divider />
 							<DropdownItem
