@@ -4,17 +4,17 @@
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Button, Col, Container, FormFeedback, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row} from 'reactstrap';
+import { Button, Col, Container, FormFeedback, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import '../../styles/modal.css';
 import { TrueFalseType } from '../../types/items';
 import TooltipMarkerComponent from '../TooltipMarkerComponent';
 import TooltipHelpComponent from '../../components/TooltipHelpComponent';
-import { UnitRepresentType, DisplayableType, UnitType} from '../../types/redux/units';
+import { UnitRepresentType, DisplayableType, UnitType } from '../../types/redux/units';
 import { tooltipBaseStyle } from '../../styles/modalStyle';
 import { unitsApi } from '../../redux/api/unitsApi';
 import { useTranslate } from '../../redux/componentHooks';
-import {showSuccessNotification,showErrorNotification} from '../../utils/notifications';
+import { showSuccessNotification, showErrorNotification } from '../../utils/notifications';
 import { LineGraphRates } from '../../types/redux/graph';
 
 /**
@@ -106,7 +106,7 @@ export default function CreateUnitModalComponent() {
 	useEffect(() => {
 		setValidUnit(
 			state.name !== '' && customRateValid(Number(state.secInRate)) && (state.typeOfUnit !== UnitType.suffix
-			|| state.suffix !== '')
+				|| state.suffix !== '')
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
 
@@ -128,11 +128,11 @@ export default function CreateUnitModalComponent() {
 		// Close modal first to avoid repeat clicks
 		setShowModal(false);
 		// Set default identifier as name if left blank
-		state.identifier = !state.identifier || state.identifier.length === 0 ? state.name: state.identifier;
+		state.identifier = !state.identifier || state.identifier.length === 0 ? state.name : state.identifier;
 		// set displayable to none if unit is meter
 		if (
 			state.typeOfUnit == UnitType.meter &&
-	state.displayable != DisplayableType.none
+			state.displayable != DisplayableType.none
 		) {
 			state.displayable = DisplayableType.none;
 		}
@@ -282,7 +282,7 @@ export default function CreateUnitModalComponent() {
 										value={state.displayable}
 										invalid={
 											state.displayable != DisplayableType.none &&
-				(state.typeOfUnit == UnitType.meter || state.suffix != '')
+											(state.typeOfUnit == UnitType.meter || state.suffix != '')
 										}
 									>
 										{Object.keys(DisplayableType).map(key => {
@@ -292,8 +292,8 @@ export default function CreateUnitModalComponent() {
 													key={key}
 													disabled={
 														(state.typeOfUnit == UnitType.meter ||
-						state.suffix != '') &&
-							key != DisplayableType.none
+															state.suffix != '') &&
+														key != DisplayableType.none
 													}
 												>
 													{translate(`DisplayableType.${key}`)}
@@ -302,12 +302,11 @@ export default function CreateUnitModalComponent() {
 										})}
 									</Input>
 									<FormFeedback>
-										{state.displayable !== DisplayableType.none &&
-					state.typeOfUnit == UnitType.meter ? (
-												<FormattedMessage id="error.displayable.meter" />
-											) : (
-												<FormattedMessage id="error.displayable.suffix.input" />
-											)}
+										{state.displayable !== DisplayableType.none && state.typeOfUnit == UnitType.meter ? (
+											<FormattedMessage id="error.displayable.meter" />
+										) : (
+											<FormattedMessage id="error.displayable.suffix.input" />
+										)}
 									</FormFeedback>
 								</FormGroup>
 							</Col>
@@ -359,7 +358,6 @@ export default function CreateUnitModalComponent() {
 									{showCustomInput && (
 										<>
 											<Label for="customRate">
-												{/* TODO translate into diff languages */}
 												{translate('unit.sec.in.rate.enter')}
 											</Label>
 											<Input
@@ -377,7 +375,7 @@ export default function CreateUnitModalComponent() {
 										<FormattedMessage
 											id="error.greater"
 											values={{ min: '1' }}
-										/>
+										/>.
 									</FormFeedback>
 								</FormGroup>
 							</Col>
@@ -394,7 +392,7 @@ export default function CreateUnitModalComponent() {
 										value={state.suffix}
 										invalid={
 											state.typeOfUnit === UnitType.suffix &&
-					state.suffix === ''
+											state.suffix === ''
 										}
 									/>
 									<FormFeedback>

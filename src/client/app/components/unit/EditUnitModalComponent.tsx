@@ -51,7 +51,8 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	const [state, setState] = useState(values);
 	const [customRate, setCustomRate] = useState(1);
 	const [showCustomInput, setShowCustomInput] = useState(false);
-	const [rate, setRate] = useState(String(values.secInRate));
+	// SHL: This was value but that reset the rate to the default and that was an issue.
+	const [rate, setRate] = useState(String(state.secInRate));
 	const conversionData = useAppSelector(selectConversionsDetails);
 	const meterDataByID = useAppSelector(selectMeterDataById);
 	const unitDataByID = useAppSelector(selectUnitDataById);
@@ -64,33 +65,75 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
 	};
 
+	// SHL: The next two functions centralized the code and made it all consistent.
+	/**
+	 * Determines if the rate is custom.
+	 * @param rate The rate to check
+	 * @returns true if the rate is custom and false if it is a standard value.
+	 */
+	const isCustomRate = (rate: number) => {
+		// Loop over all standard rates to see if the rate is one of these.
+		// If is then return false, otherwise true.
+		return !Object.entries(LineGraphRates).some(
+			([, rateValue]) => {
+				// Since the rateValue is a floating point number and rate is an integer,
+				// round to nearest integer to avoid issues with compare.
+				return Math.round(rateValue * 3600) === rate;
+			});
+	}
 
-	/* vestigial code
-	const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setState({ ...state, [e.target.name]: Number(e.target.value) });
-	};
-	*/
-	const handleCustomNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { value } = e.target;
-		// Check if the custom value option is selected
-		if (value === CUSTOM_INPUT) {
-			setRate(CUSTOM_INPUT);
-			setCustomRate(Number(rate));
-			setShowCustomInput(true);
-		} else {
-			setRate(value);
-			setState({ ...state, [e.target.name]: Number(value) });
-			setShowCustomInput(false);
+	/**
+	 * Updates the rate (both custom and regular state) including setting if custom.
+	 * @param newRate The new rate to set.
+	 */
+	const updateRates = (newRate: number) => {
+		const isCustom = isCustomRate(newRate);
+		setShowCustomInput(isCustom);
+		if (newRate !== Number(CUSTOM_INPUT)) {
+			// Should only update with the new rate if did not just select custom
+			// input from the menu.
+			setCustomRate(newRate);
 		}
-	};
-	const handleCustomRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setRate(isCustom ? CUSTOM_INPUT : newRate.toString());
+	}
+
+	// SHL: This updates state whenever need no matter the cause.
+	// Keeps react-level state, and redux state in sync for sec. in rate.
+	// Two different layers in state may differ especially when externally updated (chart link, history buttons.)
+	React.useEffect(() => {
+		updateRates(state.secInRate);
+	}, [state.secInRate]);
+
+	// SHL: Removed old, unused code.
+
+	// SHL: rename since having custom in name seemed confusing with custom rate.
+	const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
-		setCustomRate(Number(value));
+		// The input only allows a number so this should be safe.
+		// SHL: Only update state since useEffect updates other local state.
 		setState({ ...state, secInRate: Number(value) });
 	};
+
+	const handleCustomRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		// Don't update state here since wait for enter to allow to enter custom value
+		// that starts the same as a standard value.
+		setCustomRate(Number(value));
+	};
+
+	const handleEnter = (key: string) => {
+		// This detects the enter key and then uses the previously entered custom
+		// rate to set the rate as a new value.
+		if (key === 'Enter') {
+			// Form only allows integers so this should be safe.
+			setState({ ...state, secInRate: Number(customRate) });
+		}
+	};
+
 	const customRateValid = (customRate: number) => {
 		return Number.isInteger(customRate) && customRate >= 1;
 	};
+
 	/* Confirm Delete Modal */
 	// Separate from state comment to keep everything related to the warning confirmation modal together
 	const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
@@ -121,18 +164,18 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		let error_message = '';
 		for (const value of Object.values(meterDataByID)) {
 			// This unit is used by a meter so cannot be deleted. Note if in a group then in a meter so covers both.
-			if (value.unitId == state.id) {
+			if (value.unitId === state.id) {
 				// TODO see EditMeterModalComponent for issue with line breaks. Same issue in strings below.
 				error_message += ` ${translate('meter')} "${value.name}" ${translate('uses')} ${translate('unit')} ` +
 					`"${state.name}" ${translate('as.meter.unit')};`;
 			}
-			if (value.defaultGraphicUnit == state.id) {
+			if (value.defaultGraphicUnit === state.id) {
 				error_message += ` ${translate('meter')} "${value.name}" ${translate('uses')} ${translate('unit')} ` +
 					`"${state.name}" ${translate('as.meter.defaultgraphicunit')};`;
 			}
 		}
 		for (let i = 0; i < conversionData.length; i++) {
-			if (conversionData[i].sourceId == state.id) {
+			if (conversionData[i].sourceId === state.id) {
 				// This unit is the source of a conversion so cannot be deleted.
 				error_message += ` ${translate('conversion')} ${unitDataByID[conversionData[i].sourceId].name}` +
 					`${conversionArrow(conversionData[i].bidirectional)}` +
@@ -140,7 +183,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 					` "${state.name}" ${translate('unit.source.error')};`;
 			}
 
-			if (conversionData[i].destinationId == state.id) {
+			if (conversionData[i].destinationId === state.id) {
 				// This unit is the destination of a conversion so cannot be deleted.
 				error_message += ` ${translate('conversion')} ${unitDataByID[conversionData[i].sourceId].name}` +
 					`${conversionArrow(conversionData[i].bidirectional)}` +
@@ -160,17 +203,31 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		}
 	};
 
-	/* Edit Unit Validation:
-		Name cannot be blank
-		Sec in Rate must be greater than zero
-		Unit type mismatches checked on submit
-		If type of unit is suffix their must be a suffix
-	*/
-	const [validUnit, setValidUnit] = useState(false);
+	// Stores if save should be allowed but check for use by a meter is delayed until
+	// save is hit to avoid doing a lot and to give error message then.
+	const [canSave, setCanSave] = useState(false);
+	// Keeps canSave state up to date. Checks if valid and if edit made.
 	useEffect(() => {
-		setValidUnit(state.name !== '' && customRateValid(Number(customRate)) &&
-		(state.typeOfUnit !== UnitType.suffix || state.suffix !== ''));
-	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
+		// This checks:
+		// - Name cannot be blank
+		// - If type of unit is suffix their must be a suffix
+		// - The rate is set so not the custom input value. This happens if select custom value but don't input with enter.
+		const validUnit = state.name !== '' &&
+			(state.typeOfUnit !== UnitType.suffix || state.suffix !== '') && state.secInRate !== Number(CUSTOM_INPUT);
+		// Compare original props to state to see if edit made. Check above avoids thinking edit happened if
+		// custom edit started without enter hit.
+		const editMade =
+			props.unit.name !== state.name
+			|| props.unit.identifier !== state.identifier
+			|| props.unit.typeOfUnit !== state.typeOfUnit
+			|| props.unit.unitRepresent !== state.unitRepresent
+			|| props.unit.displayable !== state.displayable
+			|| props.unit.preferredDisplay !== state.preferredDisplay
+			|| props.unit.secInRate !== state.secInRate
+			|| props.unit.suffix !== state.suffix
+			|| props.unit.note !== state.note;
+		setCanSave(validUnit && editMade);
+	}, [state]);
 	/* End State */
 
 	// Reset the state to default values
@@ -180,14 +237,10 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	// Failure to edit units will not trigger a re-render, as no state has changed. Therefore, we must manually reset the values
 	const resetState = () => {
 		setState(values);
-		resetCustomRate();
+		updateRates(state.secInRate);
 	};
 
-	const resetCustomRate = () => {
-		setRate(String(values.secInRate));
-		setCustomRate(Number(values.secInRate));
-		setShowCustomInput(false);
-	};
+	// SHL: Removed resetCustomRate since no longer needed as useEffect does this.
 
 	const handleShow = () => {
 		props.handleShow();
@@ -197,10 +250,11 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		props.handleClose();
 		resetState();
 	};
+
 	// Validate the changes and return true if we should update this unit.
 	// Two reasons for not updating the unit:
 	//	1. typeOfUnit is changed from meter to something else while some meters are still linked with this unit
-	//	2. There are no changes
+	//	2. There are no changes but save button should stop this.
 	const shouldUpdateUnit = (): boolean => {
 		// true if inputted values are okay and there are changes.
 		let inputOk = true;
@@ -217,17 +271,10 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 			}
 		}
 		if (inputOk) {
-			// The input passed validation so check if changes exist.
-			// Check for case 2 by comparing state to props
-			return props.unit.name != state.name
-				|| props.unit.identifier != state.identifier
-				|| props.unit.typeOfUnit != state.typeOfUnit
-				|| props.unit.unitRepresent != state.unitRepresent
-				|| props.unit.displayable != state.displayable
-				|| props.unit.preferredDisplay != state.preferredDisplay
-				|| props.unit.secInRate != state.secInRate
-				|| props.unit.suffix != state.suffix
-				|| props.unit.note != state.note;
+			// The input passed validation so return if canSave set.
+			// In principle this should always be true since hit save
+			// be here to be safe and due to old logic setup.
+			return canSave;
 		} else {
 			// Tell user that not going to update due to input issues.
 			showErrorNotification(`${translate('unit.input.error')}`);
@@ -254,12 +301,12 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 				|| (props.unit.secInRate !== state.secInRate
 					&& (props.unit.unitRepresent === UnitRepresentType.flow || props.unit.unitRepresent === UnitRepresentType.raw));
 			// set displayable to none if unit is meter
-			if (state.typeOfUnit == UnitType.meter && state.displayable != DisplayableType.none) {
-				state.displayable = DisplayableType.none;
+			if (state.typeOfUnit === UnitType.meter && state.displayable !== DisplayableType.none) {
+				setState({ ...state, displayable: DisplayableType.none });
 			}
 			// set unit to suffix if suffix is not empty
-			if (state.typeOfUnit != UnitType.suffix && state.suffix != '') {
-				state.typeOfUnit = UnitType.suffix;
+			if (state.typeOfUnit !== UnitType.suffix && state.suffix !== '') {
+				setState({ ...state, typeOfUnit: UnitType.suffix });
 			}
 			// Save our changes by dispatching the submitEditedUnit mutation
 			submitEditedUnit({ editedUnit: state, shouldRedoCik, shouldRefreshReadingViews })
@@ -273,7 +320,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 			// The updated unit is not fetched to save time. However, the identifier might have been
 			// automatically set if it was empty. Mimic that here.
 			if (state.identifier === '') {
-				state.identifier = state.name;
+				setState({ ...state, identifier: state.name });
 			}
 		}
 	};
@@ -353,9 +400,9 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 								type='select'
 								onChange={e => handleStringChange(e)}
 								value={state.typeOfUnit}
-								invalid={state.typeOfUnit != UnitType.suffix && state.suffix != ''}>
+								invalid={state.typeOfUnit !== UnitType.suffix && state.suffix !== ''}>
 								{Object.keys(UnitType).map(key => {
-									return (<option value={key} key={key} disabled={state.suffix != '' && key != UnitType.suffix}>
+									return (<option value={key} key={key} disabled={state.suffix !== '' && key !== UnitType.suffix}>
 										{translate(`UnitType.${key}`)}</option>);
 								})}
 							</Input>
@@ -389,14 +436,14 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 								type='select'
 								value={state.displayable}
 								onChange={e => handleStringChange(e)}
-								invalid={state.displayable != DisplayableType.none && (state.typeOfUnit == UnitType.meter || state.suffix != '')}>
+								invalid={state.displayable !== DisplayableType.none && (state.typeOfUnit === UnitType.meter || state.suffix !== '')}>
 								{Object.keys(DisplayableType).map(key => {
-									return (<option value={key} key={key} disabled={(state.typeOfUnit == UnitType.meter || state.suffix != '') && key != DisplayableType.none}>
+									return (<option value={key} key={key} disabled={(state.typeOfUnit === UnitType.meter || state.suffix !== '') && key !== DisplayableType.none}>
 										{translate(`DisplayableType.${key}`)}</option>);
 								})}
 							</Input>
 							<FormFeedback>
-								{state.displayable !== DisplayableType.none && state.typeOfUnit == UnitType.meter ? (
+								{state.displayable !== DisplayableType.none && state.typeOfUnit === UnitType.meter ? (
 									<FormattedMessage id="error.displayable.meter" />
 								) : (
 									<FormattedMessage id="error.displayable.suffix.input" />
@@ -428,8 +475,9 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 								name='secInRate'
 								type='select'
 								value={rate}
-								onChange={e => handleCustomNumberChange(e)}
-								placeholder='Sec In Rate'>
+								onChange={e => handleRateChange(e)}>
+								{/* SHL: I didn't see how the input could be empty given the form settings so removed placeholder text.
+								Also, it was not translated. */}
 								{Object.entries(LineGraphRates).map(
 									([rateKey, rateValue]) => (
 										<option value={rateValue * 3600} key={rateKey}>
@@ -444,7 +492,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 							{showCustomInput && (
 								<>
 									<Label for="customRate">
-										{/* TODO translate into diff languages */}
 										{translate('unit.sec.in.rate.enter')}
 									</Label>
 									<Input
@@ -455,11 +502,14 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										min={1}
 										invalid={!customRateValid(customRate)}
 										onChange={e => handleCustomRateChange(e)}
+										// This grabs each key hit and then finishes input when hit enter.
+										onKeyDown={e => { handleEnter(e.key); }}
 									/>
 								</>
 							)}
 							<FormFeedback>
 								<FormattedMessage id="error.greater" values={{ min: '0' }} />
+								{translate('and')}{translate('an.integer')}
 							</FormFeedback>
 						</FormGroup></Col>
 						{/* Suffix input */}
@@ -499,7 +549,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 						<FormattedMessage id="discard.changes" />
 					</Button>
 					{/* On click calls the function handleSaveChanges in this component */}
-					<Button color='primary' onClick={handleSaveChanges} disabled={!validUnit}>
+					<Button color='primary' onClick={handleSaveChanges} disabled={!canSave}>
 						<FormattedMessage id="save.all" />
 					</Button>
 				</ModalFooter>
