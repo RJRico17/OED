@@ -22,6 +22,7 @@ import { showErrorNotification, showSuccessNotification } from '../../utils/noti
 import ConfirmActionModalComponent from '../ConfirmActionModalComponent';
 import TooltipMarkerComponent from '../TooltipMarkerComponent';
 import { LineGraphRates } from '../../types/redux/graph';
+import { customRateValid } from '../../utils/unitInput';
 
 interface EditUnitModalComponentProps {
 	show: boolean;
@@ -128,10 +129,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 			// Form only allows integers so this should be safe.
 			setState({ ...state, secInRate: Number(customRate) });
 		}
-	};
-
-	const customRateValid = (customRate: number) => {
-		return Number.isInteger(customRate) && customRate >= 1;
 	};
 
 	/* Confirm Delete Modal */
