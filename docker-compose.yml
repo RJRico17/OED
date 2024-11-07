@@ -16,9 +16,9 @@ services:
   web:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 15s
+      timeout: 1s
+      retries: 6
     environment:
       - OED_PRODUCTION=no
       - OED_SERVER_PORT=3000
@@ -76,8 +76,6 @@ services:
         /bin/sh -c "
         rm -f /tmp/.X99-lock &&
         Xvfb :99 -screen 0 1024x768x16 &
-        echo 'Waiting 45 seconds for web service to start...' &&
-        sleep 45 &&
         npx cypress run"
 
 
