@@ -1,3 +1,8 @@
+# *
+# * This Source Code Form is subject to the terms of the Mozilla Public
+# * License, v. 2.0. If a copy of the MPL was not distributed with this
+# * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# *
 version: "3.8"
 services:
   # Database service. It's PostgreSQL, see the Dockerfile in ./database
@@ -64,20 +69,16 @@ services:
     profiles:
       - ui-testing
     environment:
-        - CYPRESS_BASE_URL=http://web:3000
-        - DISPLAY=:99
+      - CYPRESS_BASE_URL=http://web:3000
+      - DISPLAY=:99
     working_dir: /usr/src/app
     depends_on:
-        web:
-          condition: service_healthy
+      web:
+        condition: service_healthy
     volumes:
-        - ./:/usr/src/app
+      - ./:/usr/src/app
     entrypoint: >
-        /bin/sh -c "
-        rm -f /tmp/.X99-lock &&
-        Xvfb :99 -screen 0 1024x768x16 &
-        npx cypress run"
-
-
-
-
+      /bin/sh -c "
+      rm -f /tmp/.X99-lock &&
+      Xvfb :99 -screen 0 1024x768x16 &
+      npx cypress run"
