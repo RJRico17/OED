@@ -52,7 +52,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	const [state, setState] = useState(values);
 	const [customRate, setCustomRate] = useState(1);
 	const [showCustomInput, setShowCustomInput] = useState(false);
-	// SHL: This was value but that reset the rate to the default and that was an issue.
 	const [rate, setRate] = useState(String(state.secInRate));
 	const conversionData = useAppSelector(selectConversionsDetails);
 	const meterDataByID = useAppSelector(selectMeterDataById);
@@ -66,7 +65,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
 	};
 
-	// SHL: The next two functions centralized the code and made it all consistent.
 	/**
 	 * Determines if the rate is custom.
 	 * @param rate The rate to check
@@ -98,20 +96,15 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		setRate(isCustom ? CUSTOM_INPUT : newRate.toString());
 	};
 
-	// SHL: This updates state whenever need no matter the cause.
 	// Keeps react-level state, and redux state in sync for sec. in rate.
 	// Two different layers in state may differ especially when externally updated (chart link, history buttons.)
 	React.useEffect(() => {
 		updateRates(state.secInRate);
 	}, [state.secInRate]);
 
-	// SHL: Removed old, unused code.
-
-	// SHL: rename since having custom in name seemed confusing with custom rate.
 	const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
 		// The input only allows a number so this should be safe.
-		// SHL: Only update state since useEffect updates other local state.
 		setState({ ...state, secInRate: Number(value) });
 	};
 
@@ -209,7 +202,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		// - Name cannot be blank
 		// - If type of unit is suffix their must be a suffix
 		// - The rate is set so not the custom input value. This happens if select custom value but don't input with enter.
-		// - The custom rate is a positive integer.
+		// - The custom rate is a positive integer
 		const validUnit = state.name !== '' &&
 			(state.typeOfUnit !== UnitType.suffix || state.suffix !== '') && state.secInRate !== Number(CUSTOM_INPUT)
 			&& customRateValid(Number(state.secInRate));
@@ -238,8 +231,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		setState(values);
 		updateRates(state.secInRate);
 	};
-
-	// SHL: Removed resetCustomRate since no longer needed as useEffect does this.
 
 	const handleShow = () => {
 		props.handleShow();
@@ -475,8 +466,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 									type='select'
 									value={rate}
 									onChange={e => handleRateChange(e)}>
-									{/* SHL: I didn't see how the input could be empty given the form settings so removed placeholder text.
-									Also, it was not translated. */}
 									{Object.entries(LineGraphRates).map(
 										([rateKey, rateValue]) => (
 											<option value={rateValue * 3600} key={rateKey}>

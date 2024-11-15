@@ -47,7 +47,6 @@ export default function CreateUnitModalComponent() {
 	const CUSTOM_INPUT = '-99';
 	const [showModal, setShowModal] = useState(false);
 
-	// ?? order of functions differs from edit so maybe follow that one.
 	// Handlers for each type of input change
 	const [state, setState] = useState(defaultValues);
 	const handleStringChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,7 +109,6 @@ export default function CreateUnitModalComponent() {
 	*/
 	const [validUnit, setValidUnit] = useState(false);
 	useEffect(() => {
-		// ?? order differs from edit and some tests a little different.
 		setValidUnit(
 			state.name !== '' && (state.typeOfUnit !== UnitType.suffix
 				|| state.suffix !== '') && customRateValid(Number(state.secInRate))
@@ -387,11 +385,8 @@ export default function CreateUnitModalComponent() {
 										</>
 									)}
 									<FormFeedback>
-										<FormattedMessage
-											id="error.greater"
-											values={{ min: '1' }}
-										// ?? translate as edit
-										/>.
+										<FormattedMessage id="error.greater" values={{ min: '0' }} />
+										{translate('and')}{translate('an.integer')}
 									</FormFeedback>
 								</FormGroup>
 							</Col>
