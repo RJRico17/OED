@@ -81,7 +81,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 				// round to nearest integer to avoid issues with compare.
 				return Math.round(rateValue * 3600) === rate;
 			});
-	}
+	};
 
 	/**
 	 * Updates the rate (both custom and regular state) including setting if custom.
@@ -96,7 +96,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 			setCustomRate(newRate);
 		}
 		setRate(isCustom ? CUSTOM_INPUT : newRate.toString());
-	}
+	};
 
 	// SHL: This updates state whenever need no matter the cause.
 	// Keeps react-level state, and redux state in sync for sec. in rate.
@@ -209,8 +209,10 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		// - Name cannot be blank
 		// - If type of unit is suffix their must be a suffix
 		// - The rate is set so not the custom input value. This happens if select custom value but don't input with enter.
+		// - The custom rate is a positive integer.
 		const validUnit = state.name !== '' &&
-			(state.typeOfUnit !== UnitType.suffix || state.suffix !== '') && state.secInRate !== Number(CUSTOM_INPUT);
+			(state.typeOfUnit !== UnitType.suffix || state.suffix !== '') && state.secInRate !== Number(CUSTOM_INPUT)
+			&& customRateValid(Number(state.secInRate));
 		// Compare original props to state to see if edit made. Check above avoids thinking edit happened if
 		// custom edit started without enter hit.
 		const editMade =
@@ -463,67 +465,70 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 						</FormGroup></Col>
 					</Row>
 					<Row xs='1' lg='2'>
-
 						{/* Seconds in rate input */}
-						<Col><FormGroup>
-							<Label for='secInRate'>{translate('unit.sec.in.rate')}</Label>
-							<Input
-								id='secInRate'
-								name='secInRate'
-								type='select'
-								value={rate}
-								onChange={e => handleRateChange(e)}>
-								{/* SHL: I didn't see how the input could be empty given the form settings so removed placeholder text.
-								Also, it was not translated. */}
-								{Object.entries(LineGraphRates).map(
-									([rateKey, rateValue]) => (
-										<option value={rateValue * 3600} key={rateKey}>
-											{translate(rateKey)}
-										</option>
-									)
+						<Col>
+							<FormGroup>
+								<Label for='secInRate'>{translate('unit.sec.in.rate')}</Label>
+								<Input
+									id='secInRate'
+									name='secInRate'
+									type='select'
+									value={rate}
+									onChange={e => handleRateChange(e)}>
+									{/* SHL: I didn't see how the input could be empty given the form settings so removed placeholder text.
+									Also, it was not translated. */}
+									{Object.entries(LineGraphRates).map(
+										([rateKey, rateValue]) => (
+											<option value={rateValue * 3600} key={rateKey}>
+												{translate(rateKey)}
+											</option>
+										)
+									)}
+									<option value={CUSTOM_INPUT}>
+										{translate('custom.value')}
+									</option>
+								</Input>
+								{showCustomInput && (
+									<>
+										<Label for="customRate">
+											{translate('unit.sec.in.rate.enter')}
+										</Label>
+										<Input
+											id="customRate"
+											name="customRate"
+											type="number"
+											value={customRate}
+											min={1}
+											invalid={!customRateValid(customRate)}
+											onChange={e => handleCustomRateChange(e)}
+											// This grabs each key hit and then finishes input when hit enter.
+											onKeyDown={e => { handleEnter(e.key); }}
+										/>
+									</>
 								)}
-								<option value={CUSTOM_INPUT}>
-									{translate('custom.value')}
-								</option>
-							</Input>
-							{showCustomInput && (
-								<>
-									<Label for="customRate">
-										{translate('unit.sec.in.rate.enter')}
-									</Label>
-									<Input
-										id="customRate"
-										name="customRate"
-										type="number"
-										value={customRate}
-										min={1}
-										invalid={!customRateValid(customRate)}
-										onChange={e => handleCustomRateChange(e)}
-										// This grabs each key hit and then finishes input when hit enter.
-										onKeyDown={e => { handleEnter(e.key); }}
-									/>
-								</>
-							)}
-							<FormFeedback>
-								<FormattedMessage id="error.greater" values={{ min: '0' }} />
-								{translate('and')}{translate('an.integer')}
-							</FormFeedback>
-						</FormGroup></Col>
+								<FormFeedback>
+									<FormattedMessage id="error.greater" values={{ min: '0' }} />
+									{translate('and')}{translate('an.integer')}
+								</FormFeedback>
+							</FormGroup>
+						</Col>
 						{/* Suffix input */}
-						<Col><FormGroup>
-							<Label for='suffix'>{translate('unit.suffix')}</Label>
-							<Input
-								id='suffix'
-								name='suffix'
-								type='text'
-								value={state.suffix}
-								placeholder='Suffix'
-								onChange={e => handleStringChange(e)}
-								invalid={state.typeOfUnit === UnitType.suffix && state.suffix === ''} />
-							<FormFeedback>
-								<FormattedMessage id="error.required" />
-							</FormFeedback>
-						</FormGroup></Col>
+						<Col>
+							<FormGroup>
+								<Label for='suffix'>{translate('unit.suffix')}</Label>
+								<Input
+									id='suffix'
+									name='suffix'
+									type='text'
+									value={state.suffix}
+									placeholder='Suffix'
+									onChange={e => handleStringChange(e)}
+									invalid={state.typeOfUnit === UnitType.suffix && state.suffix === ''} />
+								<FormFeedback>
+									<FormattedMessage id="error.required" />
+								</FormFeedback>
+							</FormGroup>
+						</Col>
 					</Row>
 					{/* Note input */}
 					<FormGroup>

@@ -96,7 +96,15 @@ export default function CreateUnitModalComponent() {
 		setCustomRate(Number(value));
 		setState({ ...state, secInRate: Number(value) });
 	};
-	// ?? probably should use enter for custom as edit.
+
+	const handleEnter = (key: string) => {
+		// This detects the enter key and then uses the previously entered custom
+		// rate to set the rate as a new value.
+		if (key === 'Enter') {
+			// Form only allows integers so this should be safe.
+			setState({ ...state, secInRate: Number(customRate) });
+		}
+	};
 	// ?? Note this switches from custom to standard if click off modal and then return. Not a big deal
 	//    but differs from edit that track specially. If make logic similar then can avoid.
 	/* Create Unit Validation:
@@ -108,8 +116,8 @@ export default function CreateUnitModalComponent() {
 	useEffect(() => {
 		// ?? order differs from edit and some tests a little different.
 		setValidUnit(
-			state.name !== '' && customRateValid(Number(state.secInRate)) && (state.typeOfUnit !== UnitType.suffix
-				|| state.suffix !== '')
+			state.name !== '' && (state.typeOfUnit !== UnitType.suffix
+				|| state.suffix !== '') && customRateValid(Number(state.secInRate))
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
 
@@ -236,8 +244,7 @@ export default function CreateUnitModalComponent() {
 													key={key}
 													disabled={
 														state.suffix != '' && key != UnitType.suffix
-													}
-												>
+													}>
 													{translate(`UnitType.${key}`)}
 												</option>
 											);
@@ -338,7 +345,6 @@ export default function CreateUnitModalComponent() {
 						</Row>
 						<Row xs="1" lg="2">
 							{/* Seconds in rate input */}
-							// ?? 2 line vs 1 line
 							<Col>
 								<FormGroup>
 									<Label for="secInRate">{translate('unit.sec.in.rate')}</Label>
@@ -372,7 +378,7 @@ export default function CreateUnitModalComponent() {
 												min={1}
 												invalid={!customRateValid(customRate)}
 												onChange={e => handleCustomRateChange(e)}
-											// ?? enter missing
+												onKeyDown={e => { handleEnter(e.key); }}
 											/>
 										</>
 									)}
