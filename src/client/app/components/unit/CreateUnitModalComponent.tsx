@@ -46,12 +46,8 @@ export default function CreateUnitModalComponent() {
 	// Modal show
 	const CUSTOM_INPUT = '-99';
 	const [showModal, setShowModal] = useState(false);
-	const handleClose = () => {
-		setShowModal(false);
-		resetState();
-	};
+
 	// ?? order of functions differs from edit so maybe follow that one.
-	const handleShow = () => setShowModal(true);
 	// Handlers for each type of input change
 	const [state, setState] = useState(defaultValues);
 	const handleStringChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,6 +92,7 @@ export default function CreateUnitModalComponent() {
 		setCustomRate(Number(value));
 		setState({ ...state, secInRate: Number(value) });
 	};
+
 	// ?? probably should use enter for custom as edit.
 	// ?? Note this switches from custom to standard if click off modal and then return. Not a big deal
 	//    but differs from edit that track specially. If make logic similar then can avoid.
@@ -121,6 +118,14 @@ export default function CreateUnitModalComponent() {
 		setState(defaultValues);
 		resetCustomRate();
 	};
+
+	const handleShow = () => setShowModal(true);
+
+	const handleClose = () => {
+		setShowModal(false);
+		resetState();
+	};
+
 	// ?? removed from edit but need to see if aligning logic.
 	// Helper function to reset custom rate interval box.
 	const resetCustomRate = () => {
