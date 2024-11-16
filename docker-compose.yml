@@ -20,7 +20,7 @@ services:
   # Web service runs Node
   web:
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://web:3000"]
       interval: 15s
       timeout: 1s
       retries: 6
@@ -81,4 +81,4 @@ services:
       /bin/sh -c "
       rm -f /tmp/.X99-lock &&
       Xvfb :99 -screen 0 1024x768x16 &
-      npx cypress run"
+      npx cypress open"
