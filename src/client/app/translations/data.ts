@@ -1187,7 +1187,7 @@ const LocaleTranslationData = {
 		"error.displayable": "El elemento visual determinado como falso porque no hay unidad seleccionada.",
 		"error.displayable.meter": "Las unidades de medición determinarán al elemento visual como ninguno.",
 		"error.displayable.suffix.input": "Suffix input will set displayable to none.\u{26A1}",
-		"error.greater": "Debe ser más que {min}",
+		"error.greater": "Debe ser más que {min}.",
 		"error.gps": "Latitud deber ser entre -90 y 90, y longitud de entre -180 y 180.",
 		"error.negative": "No puede ser negativo.",
 		"error.required": "Campo requerido",
