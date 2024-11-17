@@ -100,8 +100,6 @@ export default function CreateUnitModalComponent() {
 			setState({ ...state, secInRate: Number(customRate) });
 		}
 	};
-	// ?? Note this switches from custom to standard if click off modal and then return. Not a big deal
-	//    but differs from edit that track specially. If make logic similar then can avoid.
 	/* Create Unit Validation:
 		Name cannot be blank
 		Sec in Rate must be greater than zero
@@ -131,7 +129,6 @@ export default function CreateUnitModalComponent() {
 		resetState();
 	};
 
-	// ?? removed from edit but need to see if aligning logic.
 	// Helper function to reset custom rate interval box.
 	const resetCustomRate = () => {
 		setRate(String(defaultValues.secInRate));
