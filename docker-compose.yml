@@ -65,7 +65,7 @@ services:
 
   # Cypress testing service
   cypress:
-    image: cypress/included:13.15.1
+    image: cypress/latest
     profiles:
       - ui-testing
     environment:
@@ -80,5 +80,4 @@ services:
     entrypoint: >
       /bin/sh -c "
       rm -f /tmp/.X99-lock &&
-      Xvfb :99 -screen 0 1024x768x16 &
-      npx cypress run"
+      Xvfb :99 -screen 0 1024x768x16"
