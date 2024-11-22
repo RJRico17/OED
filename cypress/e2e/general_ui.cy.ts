@@ -113,6 +113,9 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
           cy.wrap(checkbox).check({ force: true }).should('be.checked'); // Check it
           cy.wrap(checkbox).uncheck({ force: true }).should('not.be.checked'); // Uncheck it
         });
-      });
+        cy.get('input[type="radio"]').each((radio) => {
+            cy.wrap(radio).check({ force: true }).should('be.checked'); // Check radio
+        });
+     });
   });
   
