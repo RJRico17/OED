@@ -85,7 +85,6 @@ export default function UIOptionsComponent() {
 			{chartToRender === ChartTypes.compareLine && <DateRangeComponent />}
 			{chartToRender === ChartTypes.compareLine && <CompareLineControlsComponent />}
 
-
 			<MoreOptionsComponent />
 
 		</div>

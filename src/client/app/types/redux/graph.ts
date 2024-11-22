@@ -10,7 +10,7 @@ import { AreaUnitType } from '../../utils/getAreaUnitConversion';
 export enum ChartTypes {
 	line = 'line',
 	bar = 'bar',
-	compare = 'compare',
+	compare = 'compare.bar',
 	map = 'map',
 	radar = 'radar',
 	threeD = '3D',

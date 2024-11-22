@@ -5,8 +5,9 @@
 import * as React from 'react';
 import { Input } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from '../redux/reduxHooks';
-// eslint-disable-next-line max-len
-import { selectGraphState, selectQueryTimeInterval, selectShiftAmount, selectShiftTimeInterval, updateShiftAmount, updateShiftTimeInterval } from '../redux/slices/graphSlice';
+import {
+	selectGraphState, selectQueryTimeInterval, selectShiftAmount, selectShiftTimeInterval, updateShiftAmount, updateShiftTimeInterval
+} from '../redux/slices/graphSlice';
 import translate from '../utils/translate';
 import { FormattedMessage } from 'react-intl';
 import { ShiftAmount } from '../types/redux/graph';
