@@ -36,5 +36,19 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
           });
         });
       });
+      
+      it('Tests dropdown menus', () => {
+        // Ensure dropdowns are visible and options are selectable
+        cy.get('select').should('have.length.greaterThan', 0); // Ensure dropdowns exist
+        cy.get('select').each((dropdown) => {
+          cy.wrap(dropdown)
+            .should('be.visible') // Check visibility
+            .find('option')
+            .should('have.length.greaterThan', 1); // Ensure options exist
+    
+          // Select the first option (change index as needed)
+          cy.wrap(dropdown).select(0);
+        });
+      });
   });
   
