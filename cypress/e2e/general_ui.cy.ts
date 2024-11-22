@@ -107,5 +107,12 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
           cy.wrap(table).find('tr').should('have.length.greaterThan', 1); // At least one row
         });
       });
+      it('Tests interactive inputs (checkboxes)', () => {
+        // Check and uncheck checkboxes
+        cy.get('input[type="checkbox"]').each((checkbox) => {
+          cy.wrap(checkbox).check({ force: true }).should('be.checked'); // Check it
+          cy.wrap(checkbox).uncheck({ force: true }).should('not.be.checked'); // Uncheck it
+        });
+      });
   });
   
