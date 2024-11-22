@@ -107,7 +107,7 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
           cy.wrap(table).find('tr').should('have.length.greaterThan', 1); // At least one row
         });
       });
-      it('Tests interactive inputs (checkboxes)', () => {
+      it('Tests interactive inputs (checkboxes and radio)', () => {
         // Check and uncheck checkboxes
         cy.get('input[type="checkbox"]').each((checkbox) => {
           cy.wrap(checkbox).check({ force: true }).should('be.checked'); // Check it
@@ -117,5 +117,9 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
             cy.wrap(radio).check({ force: true }).should('be.checked'); // Check radio
         });
      });
+     it('Tests for dynamic elements', () => {
+        // Ensure dynamically loaded elements exist and are visible
+        cy.get('[data-dynamic]').should('exist').and('be.visible');
+      });
   });
   
