@@ -70,5 +70,35 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
           cy.wrap(link).should('have.attr', 'href').and('not.be.empty'); // Check href exists
         });
       });
+      it('Tests dropdown menus', () => {
+        // Ensure dropdowns are visible and options are selectable
+        cy.get('select').should('have.length.greaterThan', 0); // Ensure dropdowns exist
+        cy.get('select').each((dropdown) => {
+          cy.wrap(dropdown)
+            .should('be.visible') // Check visibility
+            .find('option')
+            .should('have.length.greaterThan', 1); // Ensure options exist
+    
+          // Select the first option (change index as needed)
+          cy.wrap(dropdown).select(0);
+        });
+      });
+    
+      it('Tests links for navigation', () => {
+        // Ensure links have valid href attributes
+        cy.get('a[href]').each((link) => {
+          cy.wrap(link).should('have.attr', 'href').and('not.be.empty'); // Check href exists
+        });
+      });
+    
+      it('Tests modals for correct behavior', () => {
+        // Ensure modals can be triggered and closed
+        cy.get('[data-bs-toggle="modal"]').each((modalTrigger) => {
+          cy.wrap(modalTrigger).should('be.visible').click(); // Trigger modal
+          cy.get('.modal').should('be.visible'); // Check modal is visible
+          cy.get('.modal .close').click(); // Close modal
+          cy.get('.modal').should('not.be.visible'); // Check modal is closed
+        });
+      });
   });
   
