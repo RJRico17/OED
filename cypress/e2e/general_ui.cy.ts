@@ -100,5 +100,12 @@ describe('UI Functionality Tests for Open Energy Dashboard', () => {
           cy.get('.modal').should('not.be.visible'); // Check modal is closed
         });
       });
+      it('Tests tables for data population', () => {
+        // Ensure tables are populated with rows
+        cy.get('table').should('have.length.greaterThan', 0); // Ensure tables exist
+        cy.get('table').each((table) => {
+          cy.wrap(table).find('tr').should('have.length.greaterThan', 1); // At least one row
+        });
+      });
   });
   
