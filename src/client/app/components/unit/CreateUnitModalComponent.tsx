@@ -142,7 +142,7 @@ export default function CreateUnitModalComponent() {
 	// that create starts from an empty template.
 
 	// Save
-	const handleSave = () => {
+	const handleSaveChanges = () => {
 		// Close modal first to avoid repeat clicks
 		setShowModal(false);
 		const submitState = {
@@ -432,7 +432,7 @@ export default function CreateUnitModalComponent() {
 						<FormattedMessage id="discard.changes" />
 					</Button>
 					{/* On click calls the function handleSaveChanges in this component */}
-					<Button color="primary" onClick={handleSave} disabled={!validUnit}>
+					<Button color="primary" onClick={handleSaveChanges} disabled={!validUnit}>
 						<FormattedMessage id="save.all" />
 					</Button>
 				</ModalFooter>
