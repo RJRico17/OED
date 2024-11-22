@@ -25,6 +25,7 @@ import { customRateValid } from '../../utils/unitInput';
 export default function CreateUnitModalComponent() {
 	const translate = useTranslate();
 	const [submitCreateUnit] = unitsApi.useAddUnitMutation();
+	const CUSTOM_INPUT = '-99';
 
 	const defaultValues = {
 		name: '',
@@ -42,10 +43,10 @@ export default function CreateUnitModalComponent() {
 		// The units API expects these values to be undefined on call so that the database can assign their values.
 		id: -99
 	};
+
 	/* State */
 	// Unlike EditUnitModalComponent, there are no props so we don't pass show and close via props.
 	// Modal show
-	const CUSTOM_INPUT = '-99';
 	const [showModal, setShowModal] = useState(false);
 
 	// Handlers for each type of input change
@@ -123,7 +124,9 @@ export default function CreateUnitModalComponent() {
 		resetCustomRate();
 	};
 
-	const handleShow = () => setShowModal(true);
+	const handleShow = () => {
+		setShowModal(true);
+	};
 
 	const handleClose = () => {
 		setShowModal(false);
@@ -190,7 +193,7 @@ export default function CreateUnitModalComponent() {
 							{/* Identifier input */}
 							<Col>
 								<FormGroup>
-									<Label for="identifier">{translate('identifier')}</Label>
+									<Label for='identifier'>{translate('identifier')}</Label>
 									<Input
 										id="identifier"
 										name="identifier"

@@ -476,7 +476,7 @@ const LocaleTranslationData = {
 		"unit.preferred.display": "Preferred Display:",
 		"unit.represent": "Unit Represent:",
 		"unit.sec.in.rate": "Sec in Rate:",
-		"unit.sec.in.rate.enter": "Input seconds in rate and then hit enter:\u{26A1}",
+		"unit.sec.in.rate.enter": "Input seconds in rate and then hit enter:",
 		"unit.source.error": "as the source unit",
 		"unit.submit.new.unit": "Submit New Unit",
 		"unit.successfully.create.unit": "Successfully created a unit.",
