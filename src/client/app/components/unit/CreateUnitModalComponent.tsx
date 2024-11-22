@@ -25,7 +25,7 @@ import { customRateValid } from '../../utils/unitInput';
 export default function CreateUnitModalComponent() {
 	const translate = useTranslate();
 	const [submitCreateUnit] = unitsApi.useAddUnitMutation();
-	const CUSTOM_INPUT = '-99';
+	const CUSTOM_INPUT = '-77';
 
 	const defaultValues = {
 		name: '',

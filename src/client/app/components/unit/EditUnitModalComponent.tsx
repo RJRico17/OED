@@ -363,8 +363,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										type='text'
 										autoComplete='on'
 										onChange={e => handleStringChange(e)}
-										value={state.identifier}
-										placeholder='Identifier' />
+										value={state.identifier} />
 								</FormGroup>
 							</Col>
 							{/* Name input */}
@@ -523,7 +522,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										name='suffix'
 										type='text'
 										value={state.suffix}
-										placeholder='Suffix'
 										onChange={e => handleStringChange(e)}
 										invalid={state.typeOfUnit === UnitType.suffix && state.suffix === ''} />
 									<FormFeedback>
@@ -534,13 +532,12 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 						</Row>
 						{/* Note input */}
 						<FormGroup>
-							<Label for='note'>{translate('unit')}</Label>
+							<Label for='note'>{translate('note')}</Label>
 							<Input
 								id='note'
 								name='note'
 								type='textarea'
 								value={state.note}
-								placeholder='Note'
 								onChange={e => handleStringChange(e)} />
 						</FormGroup>
 					</Container>
