@@ -42,7 +42,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	const translate = useTranslate();
 	const [submitEditedUnit] = unitsApi.useEditUnitMutation();
 	const [deleteUnit] = unitsApi.useDeleteUnitMutation();
-	const CUSTOM_INPUT = '-99';
+	const CUSTOM_INPUT = '-77';
 
 	// Set existing unit values
 	const values = { ...props.unit };
@@ -200,7 +200,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 	useEffect(() => {
 		// This checks:
 		// - Name cannot be blank
-		// - If type of unit is suffix their must be a suffix
+		// - If type of unit is suffix there must be a suffix
 		// - The rate is set so not the custom input value. This happens if select custom value but don't input with enter.
 		// - The custom rate is a positive integer
 		const validUnit = state.name !== '' &&

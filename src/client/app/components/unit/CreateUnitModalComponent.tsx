@@ -84,7 +84,7 @@ export default function CreateUnitModalComponent() {
 			setShowCustomInput(true);
 		} else {
 			setRate(value);
-			setState({ ...state, [e.target.name]: Number(value) });
+			setState({ ...state, secInRate: Number(value) });
 			setShowCustomInput(false);
 		}
 	};
