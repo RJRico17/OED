@@ -65,7 +65,7 @@ services:
 
   # Cypress testing service
   cypress:
-    image: cypress/latest
+    image: cypress/included
     profiles:
       - ui-testing
     environment:
