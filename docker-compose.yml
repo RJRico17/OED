@@ -14,8 +14,8 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data/pgdata
     # Uncomment the below to access PostgreSQL server from the host machine
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
 
   # Web service runs Node
   web:
