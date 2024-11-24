@@ -58,6 +58,15 @@ export default function CreateUnitModalComponent() {
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
 	};
 	// Sets the starting rate for secInRate box, value of 3600 is chosen as default to result in Hour as default in dropdown box.
+	const isCustomRate = (rate: number) => {
+		// Check if the rate is a custom rate.
+		return !Object.entries(LineGraphRates).some(
+			([, rateValue]) => {
+				// Multiply each rate value by 3600, round it to the nearest integer,
+				// and compare it to the given rate
+				return Math.round(rateValue * 3600) === rate;
+			});
+	};
 	const [rate, setRate] = useState(String(defaultValues.secInRate));
 	// Holds the value during custom value input and it is separate from standard choices.
 	// Needs to be valid at start and overwritten before used.
@@ -77,15 +86,16 @@ export default function CreateUnitModalComponent() {
   */
 	const handleStandardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
+		const isCustom = isCustomRate(Number(value));
 		// Check if the custom value option is selected
 		if (value === CUSTOM_INPUT) {
 			setCustomRate(Number(rate));
 			setRate(CUSTOM_INPUT);
-			setShowCustomInput(true);
+			setShowCustomInput(isCustom);
 		} else {
 			setRate(value);
 			setState({ ...state, secInRate: Number(value) });
-			setShowCustomInput(false);
+			setShowCustomInput(isCustom);
 		}
 	};
 	const handleCustomRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,7 +409,6 @@ export default function CreateUnitModalComponent() {
 										id="suffix"
 										name="suffix"
 										type="text"
-										autoComplete="off"
 										onChange={e => handleStringChange(e)}
 										value={state.suffix}
 										invalid={
