@@ -306,7 +306,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 
 			// Save our changes by dispatching the submitEditedUnit mutation
 			submitEditedUnit({ editedUnit: submitState, shouldRedoCik, shouldRefreshReadingViews })
-			submitEditedUnit({ editedUnit: submitState, shouldRedoCik, shouldRefreshReadingViews })
 				.unwrap()
 				.then(() => {
 					showSuccessNotification(translate('unit.successfully.edited.unit'));
