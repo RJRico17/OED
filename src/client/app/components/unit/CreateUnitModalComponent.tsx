@@ -93,6 +93,7 @@ export default function CreateUnitModalComponent() {
 			setCustomRate(Number(rate));
 			setRate(CUSTOM_INPUT);
 			setShowCustomInput(isCustom);
+			setCanSave(false);
 		} else {
 			setRate(value);
 			setState({ ...state, secInRate: Number(value) });
@@ -124,7 +125,7 @@ export default function CreateUnitModalComponent() {
 		setValidUnit(
 			state.name !== '' && (state.typeOfUnit !== UnitType.suffix
 				|| state.suffix !== '') && customRateValid(Number(state.secInRate)) &&
-				canSave
+				(canSave || !isCustomRate(state.secInRate))
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix, canSave]);
 
