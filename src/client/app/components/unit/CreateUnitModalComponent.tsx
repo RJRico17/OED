@@ -57,6 +57,7 @@ export default function CreateUnitModalComponent() {
 	const handleBooleanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
 	};
+	const [canSave, setCanSave] = useState(false);
 	// Sets the starting rate for secInRate box, value of 3600 is chosen as default to result in Hour as default in dropdown box.
 	const isCustomRate = (rate: number) => {
 		// Check if the rate is a custom rate.
@@ -110,6 +111,7 @@ export default function CreateUnitModalComponent() {
 		if (key === 'Enter') {
 			// Form only allows integers so this should be safe.
 			setState({ ...state, secInRate: Number(customRate) });
+			setCanSave(true);
 		}
 	};
 	/* Create Unit Validation:
@@ -121,9 +123,10 @@ export default function CreateUnitModalComponent() {
 	useEffect(() => {
 		setValidUnit(
 			state.name !== '' && (state.typeOfUnit !== UnitType.suffix
-				|| state.suffix !== '') && customRateValid(Number(state.secInRate))
+				|| state.suffix !== '') && customRateValid(Number(state.secInRate)) &&
+				canSave
 		);
-	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix]);
+	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix, canSave]);
 
 	/* End State */
 
@@ -132,6 +135,7 @@ export default function CreateUnitModalComponent() {
 	const resetState = () => {
 		setState(defaultValues);
 		resetCustomRate();
+		setCanSave(false);
 	};
 
 	const handleShow = () => {
