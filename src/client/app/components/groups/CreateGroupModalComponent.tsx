@@ -52,7 +52,7 @@ export default function CreateGroupModalComponent() {
 	// Which units are possible for graphing state
 	const possibleGraphicUnits = useAppSelector(selectPossibleGraphicUnits);
 	// Obtaining language
-	const selectedLanguage = useAppSelector(selectSelectedLanguage);
+	const locale = useAppSelector(selectSelectedLanguage);
 	// Since creating group the initial values are effectively nothing or the desired defaults.
 	const defaultValues: GroupData = {
 		// ID not needed, assigned by DB, add here for TS
@@ -234,11 +234,11 @@ export default function CreateGroupModalComponent() {
 		// The id is not really needed so set to -1 since same function for edit.
 		const groupDeepMeter = metersInChangedGroup(state);
 		// Get meters that okay for this group in a format the component can display.
-		const possibleMeters = getMeterMenuOptionsForGroup(state.defaultGraphicUnit, groupDeepMeter);
+		const possibleMeters = getMeterMenuOptionsForGroup(state.defaultGraphicUnit, groupDeepMeter, locale);
 		// Get groups okay for this group. Similar to meters.
 		// Since creating a group, the group cannot yet exist in the Redux state. Thus, the id is not used
 		// in this case so set to -1 so it never matches in this function.
-		const possibleGroups = getGroupMenuOptionsForGroup(-1, state.defaultGraphicUnit, groupDeepMeter);
+		const possibleGroups = getGroupMenuOptionsForGroup(-1, state.defaultGraphicUnit, groupDeepMeter, locale);
 		// Update the state
 		setGroupChildrenState(groupChildrenState => ({
 			...groupChildrenState,
@@ -525,7 +525,7 @@ export default function CreateGroupModalComponent() {
 		});
 		// Want chosen in sorted order.
 		return selectedMetersUnsorted.sort((meterA, meterB) => meterA.label.toLowerCase()?.
-			localeCompare(meterB.label.toLowerCase(), String(selectedLanguage), { sensitivity: 'accent'}));
+			localeCompare(meterB.label.toLowerCase(), String(locale), { sensitivity: 'accent'}));
 	}
 
 	/**
@@ -545,7 +545,7 @@ export default function CreateGroupModalComponent() {
 		});
 		// Want chosen in sorted order.
 		return selectedGroupsUnsorted.sort((groupA, groupB) => groupA.label.toLowerCase()?.
-			localeCompare(groupB.label.toLowerCase(), String(selectedLanguage), { sensitivity: 'accent'}));
+			localeCompare(groupB.label.toLowerCase(), String(locale), { sensitivity: 'accent'}));
 	}
 
 	/**

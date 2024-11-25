@@ -58,6 +58,7 @@ interface EditGroupModalComponentProps {
  * @returns Group edit element
  */
 export default function EditGroupModalComponent(props: EditGroupModalComponentProps) {
+	const locale = useAppSelector(selectSelectedLanguage);
 	const translate = useTranslate();
 	const [submitGroupEdits] = groupsApi.useEditGroupMutation();
 	const [deleteGroup] = groupsApi.useDeleteGroupMutation();
@@ -347,9 +348,9 @@ export default function EditGroupModalComponent(props: EditGroupModalComponentPr
 		// Can only vary if admin and only used then.
 		if (loggedInAsAdmin) {
 			// Get meters that okay for this group in a format the component can display.
-			const possibleMeters = getMeterMenuOptionsForGroup(groupState.defaultGraphicUnit, groupState.deepMeters);
+			const possibleMeters = getMeterMenuOptionsForGroup(groupState.defaultGraphicUnit, groupState.deepMeters, locale);
 			// Get groups okay for this group. Similar to meters.
-			const possibleGroups = getGroupMenuOptionsForGroup(groupState.id, groupState.defaultGraphicUnit, groupState.deepMeters);
+			const possibleGroups = getGroupMenuOptionsForGroup(groupState.id, groupState.defaultGraphicUnit, groupState.deepMeters, locale);
 			// Update the state
 			setGroupChildrenState(groupChildrenState => ({
 				...groupChildrenState,
@@ -919,7 +920,6 @@ export default function EditGroupModalComponent(props: EditGroupModalComponentPr
 	 */
 	function metersToSelectOptions(): SelectOption[] {
 		// In format for the display component for menu.
-		const locale = useAppSelector(selectSelectedLanguage);
 		const selectedMetersUnsorted: SelectOption[] = [];
 		groupState.childMeters.forEach(groupId => {
 			selectedMetersUnsorted.push({
@@ -940,7 +940,6 @@ export default function EditGroupModalComponent(props: EditGroupModalComponentPr
 	 */
 	function groupsToSelectOptions(): SelectOption[] {
 		// In format for the display component for menu.
-		const locale = useAppSelector(selectSelectedLanguage);
 		const selectedGroupsUnsorted: SelectOption[] = [];
 		groupState.childGroups.forEach(groupId => {
 			selectedGroupsUnsorted.push({
@@ -978,7 +977,7 @@ export default function EditGroupModalComponent(props: EditGroupModalComponentPr
 			}
 		});
 		// Sort for display. Before were sorted by id so not okay here.
-		listedMeters.sort();
+		listedMeters.sort((meterA, meterB) => meterA.toLowerCase().localeCompare(meterB.toLowerCase(), locale, { sensitivity : 'accent' }));
 		if (hasHidden) {
 			// There are hidden meters so note at bottom of list.
 			listedMeters.push(translate('meter.hidden'));
@@ -1009,7 +1008,8 @@ export default function EditGroupModalComponent(props: EditGroupModalComponentPr
 			}
 		});
 		// Sort for display. Before were sorted by id so not okay here.
-		listedGroups.sort();
+		listedGroups.sort((groupA, groupB) => groupA.toLowerCase().localeCompare(
+			groupB.toLowerCase(), locale, { sensitivity : 'accent' }));
 		if (hasHidden) {
 			// There are hidden groups so note at bottom of list.
 			listedGroups.push(translate('group.hidden'));
@@ -1037,7 +1037,8 @@ export default function EditGroupModalComponent(props: EditGroupModalComponentPr
 			}
 		});
 		// Sort for display.
-		listedDeepMeters.sort();
+		listedDeepMeters.sort((deepMeterA, deepMeterB) => deepMeterA.toLowerCase().localeCompare(
+			deepMeterB.toLowerCase(), locale, { sensitivity : 'accent' }));
 		if (hasHidden) {
 			// There are hidden meters so note at bottom of list.
 			// This should never happen to an admin.

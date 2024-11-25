@@ -36,7 +36,7 @@ export default function HeaderButtonsComponent() {
 	const version = useAppSelector(selectOEDVersion);
 	const helpUrl = useAppSelector(selectHelpUrl);
 	// options help
-	const optionsHelp = helpUrl + '/optionsMenu.html';
+	const optionsHelp = helpUrl + '/optionsMenu/';
 
 	const loggedInAsAdmin = useAppSelector(selectIsAdmin);
 	const loggedIn = useAppSelector(selectIsLoggedIn);
@@ -127,7 +127,7 @@ export default function HeaderButtonsComponent() {
 			display: pathname === '/' ? 'block' : 'none'
 		};
 		// Admin help or regular user page
-		const neededPage = loggedInAsAdmin ? '/adminPageChoices.html' : '/pageChoices.html';
+		const neededPage = loggedInAsAdmin ? '/adminPageChoices/' : '/pageChoices/';
 		const currentPageChoicesHelp = helpUrl + neededPage;
 
 		setState(prevState => ({

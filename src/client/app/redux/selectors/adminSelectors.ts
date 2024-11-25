@@ -17,6 +17,7 @@ import translate from '../../utils/translate';
 import { selectAllUnits, selectUnitDataById } from '../api/unitsApi';
 import { selectVisibleMetersAndGroups } from './authVisibilitySelectors';
 import { createAppSelector } from './selectors';
+import { selectSelectedLanguage } from '../../redux/slices/appStateSlice';
 
 export const MIN_VAL = Number.MIN_SAFE_INTEGER;
 export const MAX_VAL = Number.MAX_SAFE_INTEGER;
@@ -27,14 +28,15 @@ export const MAX_DATE = MAX_DATE_MOMENT.format('YYYY-MM-DD HH:mm:ssZ');
 export const MAX_ERRORS = 75;
 export const selectPossibleGraphicUnits = createAppSelector(
 	selectUnitDataById,
-	unitDataById => potentialGraphicUnits(unitDataById)
+	selectSelectedLanguage,
+	(unitDataById, selectSelectedLanguage) => potentialGraphicUnits(unitDataById, selectSelectedLanguage)
 );
 
 /**
  * Calculates the set of all possible meter units for a meter.
  * This is any unit that is of type meter.
- * @param state # TODO
- * @param locale # TODO
+ * @param state # Redux state passed in as argument
+ * @param locale # Language selected as retrieved from state
  * @returns The set of all possible graphic units for a meter
  */
 export const selectPossibleMeterUnits = createAppSelector(
