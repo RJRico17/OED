@@ -281,6 +281,18 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		props.handleClose();
 
 		if (shouldUpdateUnit()) {
+
+			const submitState = {
+				...state,
+				// The updated unit is not fetched to save time. However, the identifier might have been
+				// automatically set if it was empty. Mimic that here.
+				identifier: (state.identifier === '') ? state.name : state.identifier,
+				// set displayable to none if unit is meter
+				displayable: (state.typeOfUnit === UnitType.meter && state.displayable !== DisplayableType.none) ? DisplayableType.none : state.displayable,
+				// set unit to suffix if suffix is not empty
+				typeOfUnit: (state.typeOfUnit !== UnitType.suffix && state.suffix !== '') ? UnitType.suffix : state.typeOfUnit
+			}
+
 			// Need to redo Cik if the suffix, displayable, or type of unit changes.
 			// For displayable, it only matters if it changes from/to NONE but a more general check is used here for simplification.
 			const shouldRedoCik = props.unit.suffix !== state.suffix
@@ -290,16 +302,9 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 			const shouldRefreshReadingViews = props.unit.unitRepresent !== state.unitRepresent
 				|| (props.unit.secInRate !== state.secInRate
 					&& (props.unit.unitRepresent === UnitRepresentType.flow || props.unit.unitRepresent === UnitRepresentType.raw));
-			// set displayable to none if unit is meter
-			if (state.typeOfUnit === UnitType.meter && state.displayable !== DisplayableType.none) {
-				setState({ ...state, displayable: DisplayableType.none });
-			}
-			// set unit to suffix if suffix is not empty
-			if (state.typeOfUnit !== UnitType.suffix && state.suffix !== '') {
-				setState({ ...state, typeOfUnit: UnitType.suffix });
-			}
+
 			// Save our changes by dispatching the submitEditedUnit mutation
-			submitEditedUnit({ editedUnit: state, shouldRedoCik, shouldRefreshReadingViews })
+			submitEditedUnit({ editedUnit: submitState, shouldRedoCik, shouldRefreshReadingViews })
 				.unwrap()
 				.then(() => {
 					showSuccessNotification(translate('unit.successfully.edited.unit'));
@@ -307,11 +312,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 				.catch(() => {
 					showErrorNotification(translate('unit.failed.to.edit.unit'));
 				});
-			// The updated unit is not fetched to save time. However, the identifier might have been
-			// automatically set if it was empty. Mimic that here.
-			if (state.identifier === '') {
-				setState({ ...state, identifier: state.name });
-			}
 		}
 	};
 
