@@ -13,7 +13,6 @@ import LocaleTranslationData from '../translations/data';
 import { UserRole } from '../types/items';
 import AppLayout from './AppLayout';
 import HomeComponent from './HomeComponent';
-import LoginComponent from './LoginComponent';
 import AdminComponent from './admin/AdminComponent';
 import UsersDetailComponent from './admin/users/UsersDetailComponent';
 import ConversionsDetailComponent from './conversion/ConversionsDetailComponent';
@@ -26,6 +25,7 @@ import RoleOutlet from './router/RoleOutlet';
 import UnitsDetailComponent from './unit/UnitsDetailComponent';
 import ErrorComponent from './router/ErrorComponent';
 import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
+import VisualUnitDetailComponent from './visual-unit/VisualUnitDetailComponent';
 
 /**
  * @returns the router component Responsible for client side routing.
@@ -47,7 +47,6 @@ const router = createBrowserRouter([
 		path: '/', element: <AppLayout />, errorElement: <ErrorComponent />,
 		children: [
 			{ index: true, element: <HomeComponent /> },
-			{ path: 'login', element: <LoginComponent /> },
 			{ path: 'groups', element: <GroupsDetailComponent /> },
 			{ path: 'meters', element: <MetersDetailComponent /> },
 			{ path: 'graph', element: <GraphLink /> },
@@ -60,7 +59,8 @@ const router = createBrowserRouter([
 					{ path: 'csvMeters', element: <MetersCSVUploadComponent /> },
 					{ path: 'maps', element: <MapsDetailContainer /> },
 					{ path: 'units', element: <UnitsDetailComponent /> },
-					{ path: 'users', element: <UsersDetailComponent /> }
+					{ path: 'users', element: <UsersDetailComponent /> },
+					{ path: 'visual-unit', element: <VisualUnitDetailComponent/> }
 				]
 			},
 			{
