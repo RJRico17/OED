@@ -91,6 +91,9 @@ export const graphSlice = createSlice({
 			}
 		},
 		updateShiftTimeInterval: (state, action: PayloadAction<TimeInterval>) => {
+			// same as updateTimeInterval, always update if action is bounded,
+			// else only set unbounded if current isn't already unbounded.
+			// clearing when already unbounded should be a no-op
 			if (action.payload.getIsBounded() || state.current.shiftTimeInterval.getIsBounded()) {
 				state.current.shiftTimeInterval = action.payload;
 			}
@@ -356,6 +359,12 @@ export const graphSlice = createSlice({
 								break;
 							case 'unitID':
 								current.selectedUnit = parseInt(value);
+								break;
+							case 'shiftAmount':
+								current.shiftAmount = value as ShiftAmount;
+								break;
+							case 'shiftTimeInterval':
+								current.shiftTimeInterval = TimeInterval.fromString(value);
 								break;
 						}
 					});

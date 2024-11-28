@@ -20,7 +20,7 @@ import { TimeInterval } from '../../../common/TimeInterval';
 import { showWarnNotification } from '../utils/notifications';
 
 /**
- * @returns compare line control page
+ * @returns compare line control component for compare line graph page
  */
 export default function CompareLineControlsComponent() {
 	const dispatch = useAppDispatch();
@@ -33,9 +33,9 @@ export default function CompareLineControlsComponent() {
 	// Hold value of shifting option (week, month, year, or custom)
 	const [shiftOption, setShiftOption] = React.useState<ShiftAmount>(shiftAmount);
 	// Hold value to track whether custom data range picker should show up or not
-	const [showDatePicker, setShowDatePicker] = React.useState(false);
+	// const [showDatePicker, setShowDatePicker] = React.useState(false);
 	// Hold value to store the custom date range for the shift interval
-	const [customDateRange, setCustomDateRange] = React.useState<Value>(timeIntervalToDateRange(shiftInterval));
+	const [customDateRange, setCustomDateRange] = React.useState<TimeInterval>(shiftInterval);
 
 	// Add this useEffect to update the shift interval when the shift option changes
 	React.useEffect(() => {
@@ -46,7 +46,7 @@ export default function CompareLineControlsComponent() {
 
 	// Update custom date range value when shift interval changes
 	React.useEffect(() => {
-		setCustomDateRange(timeIntervalToDateRange(shiftInterval));
+		setCustomDateRange(shiftInterval);
 	}, [shiftInterval]);
 
 	// Check for leap year shifting when new interval or meter/group is chosen
@@ -55,7 +55,7 @@ export default function CompareLineControlsComponent() {
 		const endDate = timeInterval.getEndTimestamp();
 		if (startDate && endDate) {
 			// Check whether shifting to (or from) leap year to non leap year or not
-			checkLeapYearFunc(startDate, endDate, shiftOption);
+			checkLeapYear(startDate, endDate, shiftOption);
 		}
 	}, [graphState.threeD.meterOrGroupID, timeInterval]);
 
@@ -64,9 +64,9 @@ export default function CompareLineControlsComponent() {
 		if (value === 'custom') {
 			setShiftOption(ShiftAmount.custom);
 			dispatch(updateShiftAmount(ShiftAmount.custom));
-			setShowDatePicker(true);
+			// setShowDatePicker(true);
 		} else {
-			setShowDatePicker(false);
+			// setShowDatePicker(false);
 			const newShiftOption = value as ShiftAmount;
 			setShiftOption(newShiftOption);
 			dispatch(updateShiftAmount(newShiftOption));
@@ -75,9 +75,9 @@ export default function CompareLineControlsComponent() {
 			const startDate = timeInterval.getStartTimestamp();
 			const endDate = timeInterval.getEndTimestamp();
 
-			if (startDate && endDate) {
+			if (timeInterval.getIsBounded()) {
 				// Check whether shifting to (or from) leap year to non leap year or not
-				checkLeapYearFunc(startDate, endDate, newShiftOption);
+				checkLeapYear(startDate, endDate, newShiftOption);
 			}
 			// Update shift interval when shift option changes
 			updateShiftInterval(newShiftOption);
@@ -89,7 +89,7 @@ export default function CompareLineControlsComponent() {
 		const startDate = timeInterval.getStartTimestamp();
 		const endDate = timeInterval.getEndTimestamp();
 		if (startDate !== null || endDate !== null) {
-			const { shiftedStart, shiftedEnd } = shiftDateFunc(startDate, endDate, shiftOption);
+			const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftOption);
 			const newInterval = new TimeInterval(shiftedStart, shiftedEnd);
 			dispatch(updateShiftTimeInterval(newInterval));
 		}
@@ -97,7 +97,7 @@ export default function CompareLineControlsComponent() {
 
 	// Update date when the data range picker is used in custome shifting option
 	const handleShiftDateChange = (value: Value) => {
-		setCustomDateRange(value);
+		setCustomDateRange(dateRangeToTimeInterval(value));
 		dispatch(updateShiftTimeInterval(dateRangeToTimeInterval(value)));
 	};
 
@@ -123,9 +123,10 @@ export default function CompareLineControlsComponent() {
 					<option value="custom">{translate('custom.date.range')}</option>
 				</Input>
 				{/* Show date picker when custom date range is selected */}
-				{showDatePicker &&
+				{/* {showDatePicker && */}
+				{shiftOption === ShiftAmount.custom &&
 					<DateRangePicker
-						value={customDateRange}
+						value={timeIntervalToDateRange(customDateRange)}
 						onChange={handleShiftDateChange}
 						minDate={new Date(1970, 0, 1)}
 						maxDate={new Date()}
@@ -149,7 +150,7 @@ const labelStyle: React.CSSProperties = { fontWeight: 'bold', margin: 0 };
  * @param shiftType shifting amount in week, month, or year
  * @returns shifted start and shifted end dates for the new data
  */
-export function shiftDateFunc(originalStart: moment.Moment, originalEnd: moment.Moment, shiftType: ShiftAmount) {
+export function shiftDate(originalStart: moment.Moment, originalEnd: moment.Moment, shiftType: ShiftAmount) {
 	let shiftedStart: moment.Moment;
 	let shiftedEnd: moment.Moment;
 
@@ -209,8 +210,8 @@ export function shiftDateFunc(originalStart: moment.Moment, originalEnd: moment.
  * @param endDate original data end date
  * @param shiftOption shifting option
  */
-function checkLeapYearFunc(startDate: moment.Moment, endDate: moment.Moment, shiftOption: ShiftAmount) {
-	const { shiftedStart, shiftedEnd } = shiftDateFunc(startDate, endDate, shiftOption);
+function checkLeapYear(startDate: moment.Moment, endDate: moment.Moment, shiftOption: ShiftAmount) {
+	const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftOption);
 	const originalIsLeapYear = startDate.isLeapYear() || endDate.isLeapYear();
 	const shiftedIsLeapYear = shiftedStart.isLeapYear() || shiftedEnd.isLeapYear();
 

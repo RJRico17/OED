@@ -22,7 +22,7 @@ import { selectThreeDComponentInfo } from '../redux/selectors/threeDSelectors';
 import { selectPlotlyGroupData, selectPlotlyMeterData } from '../redux/selectors/lineChartSelectors';
 import { MeterOrGroup, ShiftAmount } from '../types/redux/graph';
 import { PlotRelayoutEvent } from 'plotly.js';
-import { shiftDateFunc } from './CompareLineControlsComponent';
+import { shiftDate } from './CompareLineControlsComponent';
 /**
  * @returns plotlyLine graphic
  */
@@ -40,8 +40,8 @@ export default function CompareLineChartComponent() {
 	const timeInterval = graphState.queryTimeInterval;
 
 	// Storing the time interval strings for the original data and the shifted data to use for range in plot
-	const [timeIntervalStr, setTimeIntervalStr] = React.useState(['', '']);
-	const [shiftIntervalStr, setShiftIntervalStr] = React.useState(['', '']);
+	const [timeIntervalStr, setTimeIntervalStr] = React.useState(TimeInterval.unbounded());
+	const [shiftIntervalStr, setShiftIntervalStr] = React.useState(TimeInterval.unbounded());
 
 	// Fetch original data, and derive plotly points
 	const { data, isFetching } = graphState.threeD.meterOrGroup === MeterOrGroup.meters ?
@@ -65,26 +65,19 @@ export default function CompareLineChartComponent() {
 				})
 			});
 
-	// Callback function to update the shifted interval based on current interval and shift amount
-	const updateShiftedInterval = React.useCallback((start: moment.Moment, end: moment.Moment, shift: ShiftAmount) => {
-		const { shiftedStart, shiftedEnd } = shiftDateFunc(start, end, shift);
-		const newShiftedInterval = new TimeInterval(shiftedStart, shiftedEnd);
-		dispatch(updateShiftTimeInterval(newShiftedInterval));
-	}, []);
-
 	// Update shifted interval based on current interval and shift amount
 	React.useEffect(() => {
 		const startDate = timeInterval.getStartTimestamp();
 		const endDate = timeInterval.getEndTimestamp();
 
 		if (startDate && endDate) {
-			setTimeIntervalStr([startDate.toISOString(), endDate.toISOString()]);
-
+			setTimeIntervalStr(timeInterval);
 			if (shiftAmount !== ShiftAmount.none && shiftAmount !== ShiftAmount.custom) {
-				updateShiftedInterval(startDate, endDate, shiftAmount);
+				const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftAmount);
+				dispatch(updateShiftTimeInterval(new TimeInterval(shiftedStart, shiftedEnd)));
 			}
 		}
-	}, [timeInterval, shiftAmount, updateShiftedInterval]);
+	}, [timeInterval, shiftAmount]);
 
 	// Update shift interval string based on shift interval or time interval
 	React.useEffect(() => {
@@ -92,13 +85,13 @@ export default function CompareLineChartComponent() {
 		const shiftEnd = shiftInterval.getEndTimestamp();
 
 		if (shiftStart && shiftEnd) {
-			setShiftIntervalStr([shiftStart.toISOString(), shiftEnd.toISOString()]);
+			setShiftIntervalStr(shiftInterval);
 		} else {
 			// If shift interval is not set, use the original time interval
 			const startDate = timeInterval.getStartTimestamp();
 			const endDate = timeInterval.getEndTimestamp();
 			if (startDate && endDate) {
-				setShiftIntervalStr([startDate.toISOString(), endDate.toISOString()]);
+				setShiftIntervalStr(timeInterval);
 			}
 		}
 	}, [shiftInterval, timeInterval]);
@@ -130,17 +123,16 @@ export default function CompareLineChartComponent() {
 	}
 
 	// Check if there is at least one valid graph for current data and shifted data
-	const enoughData = data.find(data => data.x!.length > 1);
-	const enoughNewData = dataNew.find(dataNew => dataNew.x!.length > 1);
+	const enoughData = data.find(data => data.x!.length > 1) && dataNew.find(dataNew => dataNew.x!.length > 1);
 
 	// Customize the layout of the plot
 	// See https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497 for showing text `not plot.
 	if (!graphState.threeD.meterOrGroup && (data.length === 0 || dataNew.length === 0)) {
 		return <><ThreeDPillComponent /><h1>{`${translate('select.meter.group')}`}</h1></>;
-	} else if (!enoughData || !enoughNewData) {
-		return <><ThreeDPillComponent /><h1>{`${translate('no.data.in.range')}`}</h1></>;
 	} else if (!timeInterval.getIsBounded()) {
 		return <><ThreeDPillComponent /><h1>{`${translate('please.set.the.date.range')}`}</h1></>;
+	} else if (!enoughData) {
+		return <><ThreeDPillComponent /><h1>{`${translate('no.data.in.range')}`}</h1></>;
 	} else {
 		// adding information to the shifted data so that it can be plotted on the same graph with current data
 		const updateDataNew = dataNew.map(item => ({
@@ -168,7 +160,9 @@ export default function CompareLineChartComponent() {
 						xaxis: {
 							rangeslider: { visible: true },
 							// Set range for x-axis based on timeIntervalStr so that current data and shifted data is aligned
-							range: timeIntervalStr.length === 2 ? timeIntervalStr : undefined
+							range: timeIntervalStr.getIsBounded()
+								? [timeIntervalStr.getStartTimestamp(), timeIntervalStr.getEndTimestamp()]
+								: undefined
 						},
 						xaxis2: {
 							titlefont: { color: '#1AA5F0' },
@@ -176,7 +170,9 @@ export default function CompareLineChartComponent() {
 							overlaying: 'x',
 							side: 'top',
 							// Set range for x-axis2 based on shiftIntervalStr so that current data and shifted data is aligned
-							range: shiftIntervalStr.length === 2 ? shiftIntervalStr : undefined
+							range: shiftIntervalStr.getIsBounded()
+								? [shiftIntervalStr.getStartTimestamp(), shiftIntervalStr.getEndTimestamp()]
+								: undefined
 						}
 					}}
 					config={{

@@ -79,7 +79,6 @@ export default function MoreOptionsComponent() {
 							{chartToRender === ChartTypes.compareLine && <GraphicRateMenuComponent />}
 							{chartToRender === ChartTypes.compareLine && <AreaUnitSelectComponent />}
 							{chartToRender === ChartTypes.compareLine && <ErrorBarComponent />}
-							{chartToRender === ChartTypes.compareLine && <ExportComponent />}
 							{chartToRender === ChartTypes.compareLine && <ChartLinkComponent />}
 						</ModalBody>
 						<ModalFooter></ModalFooter>
