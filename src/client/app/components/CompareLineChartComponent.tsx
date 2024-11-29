@@ -25,6 +25,7 @@ import { MeterOrGroup, ShiftAmount } from '../types/redux/graph';
 import { shiftDate } from './CompareLineControlsComponent';
 import { showInfoNotification, showWarnNotification } from '../utils/notifications';
 import { PlotRelayoutEvent } from 'plotly.js';
+import { setHelpLayout } from './ThreeDComponent';
 
 /**
  * @returns plotlyLine graphic
@@ -45,6 +46,8 @@ export default function CompareLineChartComponent() {
 	// Storing the time interval strings for the original data and the shifted data to use for range in plot
 	const [timeIntervalStr, setTimeIntervalStr] = React.useState(TimeInterval.unbounded());
 	const [shiftIntervalStr, setShiftIntervalStr] = React.useState(TimeInterval.unbounded());
+	// Layout for the plot
+	let layout = {};
 
 	// Fetch original data, and derive plotly points
 	const { data, isFetching } = graphState.threeD.meterOrGroup === MeterOrGroup.meters ?
@@ -116,67 +119,67 @@ export default function CompareLineChartComponent() {
 				})
 			});
 
-	if (isFetching || isFetchingNew) {
-		return <SpinnerComponent loading height={50} width={50} />;
-	}
-
 	// Check if there is at least one valid graph for current data and shifted data
 	const enoughData = data.find(data => data.x!.length > 1) && dataNew.find(dataNew => dataNew.x!.length > 1);
 
 	// Customize the layout of the plot
 	// See https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497 for showing text `not plot.
 	if (!meterOrGroupID) {
-		return <><ThreeDPillComponent /><h1>{`${translate('select.meter.group')}`}</h1></>;
+		layout = setHelpLayout(translate('select.meter.group'));
 	} else if (!timeInterval.getIsBounded()) {
-		return <><ThreeDPillComponent /><h1>{`${translate('please.set.the.date.range')}`}</h1></>;
+		layout = setHelpLayout(translate('please.set.the.date.range'));
 	} else if (!enoughData) {
-		return <><ThreeDPillComponent /><h1>{`${translate('no.data.in.range')}`}</h1></>;
+		layout = setHelpLayout(translate('no.data.in.range'));
 	} else {
 		// Checks/warnings on received reading data
 		if (timeInterval.getIsBounded() && shiftInterval.getIsBounded()) {
-			checkReceivedData(data[0].x, dataNew[0].x);
+			checkReceivedData(data[0], dataNew[0]);
 		}
+		layout = {
+			autosize: true, showlegend: true,
+			legend: { x: 0, y: 1.1, orientation: 'h' },
+			// 'fixedrange' on the yAxis means that dragging is only allowed on the xAxis which we utilize for selecting dateRanges
+			yaxis: { title: unitLabel, gridcolor: '#ddd', fixedrange: true },
+			xaxis: {
+				// Set range for x-axis based on timeIntervalStr so that current data and shifted data is aligned
+				range: timeIntervalStr.getIsBounded()
+					? [timeIntervalStr.getStartTimestamp(), timeIntervalStr.getEndTimestamp()]
+					: undefined
+			},
+			xaxis2: {
+				titlefont: { color: '#1AA5F0' },
+				tickfont: { color: '#1AA5F0' },
+				overlaying: 'x',
+				side: 'top',
+				// Set range for x-axis2 based on shiftIntervalStr so that current data and shifted data is aligned
+				range: shiftIntervalStr.getIsBounded()
+					? [shiftIntervalStr.getStartTimestamp(), shiftIntervalStr.getEndTimestamp()]
+					: undefined
+			}
+		};
+	}
 
-		// Adding information to the shifted data so that it can be plotted on the same graph with current data
-		const updateDataNew = dataNew.map(item => ({
-			...item,
-			name: 'Shifted ' + item.name,
-			line: { ...item.line, color: '#1AA5F0' },
-			xaxis: 'x2',
-			text: Array.isArray(item.text)
-				? item.text.map(text => text.replace('<br>', '<br>Shifted '))
-				: item.text?.replace('<br>', '<br>Shifted ')
-		}));
+	// Adding information to the shifted data so that it can be plotted on the same graph with current data
+	const updateDataNew = dataNew.map(item => ({
+		...item,
+		name: 'Shifted ' + item.name,
+		line: { ...item.line, color: '#1AA5F0' },
+		xaxis: 'x2',
+		text: Array.isArray(item.text)
+			? item.text.map(text => text.replace('<br>', '<br>Shifted '))
+			: item.text?.replace('<br>', '<br>Shifted ')
+	}));
 
-		return (
-			<>
-				<ThreeDPillComponent />
-				<Plot
+	return (
+		<>
+			<ThreeDPillComponent />
+			{isFetching || isFetchingNew
+				? <SpinnerComponent loading height={50} width={50} />
+				: <Plot
 					// Only plot shifted data if the shiftAmount has been chosen
 					data={shiftAmount === ShiftAmount.none ? [...data] : [...data, ...updateDataNew]}
 					style={{ width: '100%', height: '100%', minHeight: '700px' }}
-					layout={{
-						autosize: true, showlegend: true,
-						legend: { x: 0, y: 1.1, orientation: 'h' },
-						// 'fixedrange' on the yAxis means that dragging is only allowed on the xAxis which we utilize for selecting dateRanges
-						yaxis: { title: unitLabel, gridcolor: '#ddd', fixedrange: true },
-						xaxis: {
-							// Set range for x-axis based on timeIntervalStr so that current data and shifted data is aligned
-							range: timeIntervalStr.getIsBounded()
-								? [timeIntervalStr.getStartTimestamp(), timeIntervalStr.getEndTimestamp()]
-								: undefined
-						},
-						xaxis2: {
-							titlefont: { color: '#1AA5F0' },
-							tickfont: { color: '#1AA5F0' },
-							overlaying: 'x',
-							side: 'top',
-							// Set range for x-axis2 based on shiftIntervalStr so that current data and shifted data is aligned
-							range: shiftIntervalStr.getIsBounded()
-								? [shiftIntervalStr.getStartTimestamp(), shiftIntervalStr.getEndTimestamp()]
-								: undefined
-						}
-					}}
+					layout={layout}
 					config={{
 						responsive: true,
 						displayModeBar: false,
@@ -206,11 +209,12 @@ export default function CompareLineChartComponent() {
 						}, 500, { leading: false, trailing: true })
 					}
 				/>
-			</>
+			}
 
-		);
+		</>
 
-	}
+	);
+
 }
 
 /**
@@ -221,10 +225,12 @@ export default function CompareLineChartComponent() {
  * If not, it is unlikely but can happen if there are missing readings in both lines that do not align but there are the same number missing in both.
  * This is an ugly edge case that OED is not going to try to catch now.
  * Use the last index in Redux state as a proxy for the number since need that below.
- * @param originalReading original data to compare
- * @param shiftedReading shifted data to compare
+ * @param originalData original data to compare
+ * @param shiftedData shifted data to compare
  */
-function checkReceivedData(originalReading: any, shiftedReading: any) {
+function checkReceivedData(originalData: any, shiftedData: any) {
+	const originalReading = originalData.x;
+	const shiftedReading = shiftedData.x;
 	let numberPointsSame = true;
 	if (originalReading.length !== shiftedReading.length) {
 		// If the number of points vary then then scales will not line up point by point. Warn the user.
