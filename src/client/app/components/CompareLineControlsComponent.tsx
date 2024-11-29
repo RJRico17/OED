@@ -6,7 +6,7 @@ import * as React from 'react';
 import { Input } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from '../redux/reduxHooks';
 import {
-	selectGraphState, selectQueryTimeInterval, selectShiftAmount, selectShiftTimeInterval, updateShiftAmount, updateShiftTimeInterval
+	selectQueryTimeInterval, selectShiftAmount, selectShiftTimeInterval, updateShiftAmount, updateShiftTimeInterval
 } from '../redux/slices/graphSlice';
 import translate from '../utils/translate';
 import { FormattedMessage } from 'react-intl';
@@ -17,7 +17,7 @@ import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
 import { Value } from '@wojtekmaj/react-daterange-picker/dist/cjs/shared/types';
 import * as moment from 'moment';
 import { TimeInterval } from '../../../common/TimeInterval';
-import { showWarnNotification } from '../utils/notifications';
+// import { showWarnNotification } from '../utils/notifications';
 
 /**
  * @returns compare line control component for compare line graph page
@@ -28,12 +28,9 @@ export default function CompareLineControlsComponent() {
 	const timeInterval = useAppSelector(selectQueryTimeInterval);
 	const locale = useAppSelector(selectSelectedLanguage);
 	const shiftInterval = useAppSelector(selectShiftTimeInterval);
-	const graphState = useAppSelector(selectGraphState);
 
 	// Hold value of shifting option (week, month, year, or custom)
 	const [shiftOption, setShiftOption] = React.useState<ShiftAmount>(shiftAmount);
-	// Hold value to track whether custom data range picker should show up or not
-	// const [showDatePicker, setShowDatePicker] = React.useState(false);
 	// Hold value to store the custom date range for the shift interval
 	const [customDateRange, setCustomDateRange] = React.useState<TimeInterval>(shiftInterval);
 
@@ -49,42 +46,20 @@ export default function CompareLineControlsComponent() {
 		setCustomDateRange(shiftInterval);
 	}, [shiftInterval]);
 
-	// Check for leap year shifting when new interval or meter/group is chosen
-	React.useEffect(() => {
-		const startDate = timeInterval.getStartTimestamp();
-		const endDate = timeInterval.getEndTimestamp();
-		if (startDate && endDate) {
-			// Check whether shifting to (or from) leap year to non leap year or not
-			checkLeapYear(startDate, endDate, shiftOption);
-		}
-	}, [graphState.threeD.meterOrGroupID, timeInterval]);
-
 	// Handle changes in shift option (week, month, year, or custom)
 	const handleShiftOptionChange = (value: string) => {
 		if (value === 'custom') {
 			setShiftOption(ShiftAmount.custom);
 			dispatch(updateShiftAmount(ShiftAmount.custom));
-			// setShowDatePicker(true);
 		} else {
-			// setShowDatePicker(false);
 			const newShiftOption = value as ShiftAmount;
 			setShiftOption(newShiftOption);
 			dispatch(updateShiftAmount(newShiftOption));
-
-			// notify user when original data or shift data cross leap year
-			const startDate = timeInterval.getStartTimestamp();
-			const endDate = timeInterval.getEndTimestamp();
-
-			if (timeInterval.getIsBounded()) {
-				// Check whether shifting to (or from) leap year to non leap year or not
-				checkLeapYear(startDate, endDate, newShiftOption);
-			}
-			// Update shift interval when shift option changes
 			updateShiftInterval(newShiftOption);
 		}
 	};
 
-	// update shift data date range when shift date interval option is chosen
+	// Update shift data date range when shift date interval option is chosen
 	const updateShiftInterval = (shiftOption: ShiftAmount) => {
 		const startDate = timeInterval.getStartTimestamp();
 		const endDate = timeInterval.getEndTimestamp();
@@ -104,7 +79,7 @@ export default function CompareLineControlsComponent() {
 	return (
 		<>
 			<div key='side-options'>
-				<p style={labelStyle}>
+				<p style={{ fontWeight: 'bold', margin: 0 }}>
 					<FormattedMessage id='shift.date.interval' />
 					{/* <TooltipMarkerComponent helpTextId='help.shift.date.interval' /> // TODO: Add later */}
 				</p>
@@ -123,7 +98,6 @@ export default function CompareLineControlsComponent() {
 					<option value="custom">{translate('custom.date.range')}</option>
 				</Input>
 				{/* Show date picker when custom date range is selected */}
-				{/* {showDatePicker && */}
 				{shiftOption === ShiftAmount.custom &&
 					<DateRangePicker
 						value={timeIntervalToDateRange(customDateRange)}
@@ -141,97 +115,124 @@ export default function CompareLineControlsComponent() {
 
 }
 
-const labelStyle: React.CSSProperties = { fontWeight: 'bold', margin: 0 };
-
 /**
- * shifting date function to find the shifted start date and shifted end date
+ * Shifting date function to find the shifted start date and shifted end date for shift amount that is not custom
  * @param originalStart  start date of current graph data
  * @param originalEnd end date of current graph data
  * @param shiftType shifting amount in week, month, or year
  * @returns shifted start and shifted end dates for the new data
  */
 export function shiftDate(originalStart: moment.Moment, originalEnd: moment.Moment, shiftType: ShiftAmount) {
-	let shiftedStart: moment.Moment;
-	let shiftedEnd: moment.Moment;
+	let shiftedStart = originalStart.clone();
 
-	const originalRangeDays = originalEnd.diff(originalStart, 'days');
-
-	switch (shiftType) {
-		case 'none':
-			shiftedStart = originalStart.clone();
-			shiftedEnd = originalEnd.clone();
-			break;
-
-		case 'week':
-			shiftedStart = originalStart.clone().subtract(7, 'days');
-			shiftedEnd = originalEnd.clone().subtract(7, 'days');
-			break;
-
-		case 'month':
-			shiftedStart = originalStart.clone().subtract(1, 'months');
-			shiftedEnd = shiftedStart.clone().add(originalRangeDays, 'days');
-
-			if (shiftedEnd.isSameOrAfter(originalStart)) {
-				shiftedEnd = originalStart.clone().subtract(1, 'day');
-			} else if (originalStart.date() === 1 && originalEnd.date() === originalEnd.daysInMonth()) {
-				if (!(shiftedStart.date() === 1 && shiftedEnd.date() === shiftedEnd.daysInMonth())) {
-					shiftedEnd = shiftedStart.clone().endOf('month');
-				}
-			}
-			break;
-
-		case 'year':
-			shiftedStart = originalStart.clone().subtract(1, 'years');
-			shiftedEnd = originalEnd.clone().subtract(1, 'years');
-
-			if (originalStart.isLeapYear() && originalStart.month() === 1 && originalStart.date() === 29) {
-				shiftedStart = shiftedStart.month(2).date(1);
-			}
-			if (originalEnd.isLeapYear() && originalEnd.month() === 1 && originalEnd.date() === 29) {
-				shiftedEnd = shiftedEnd.month(1).date(28);
-			}
-			if (shiftedEnd.isSameOrAfter(originalStart)) {
-				shiftedEnd = originalStart.clone().subtract(1, 'day');
-			}
-			break;
-
-		default:
-			shiftedStart = originalStart.clone();
-			shiftedEnd = originalEnd.clone();
+	if (shiftType === ShiftAmount.none) {
+		shiftedStart = originalStart.clone();
+	} else if (shiftType === ShiftAmount.week) {
+		shiftedStart = originalStart.clone().subtract(7, 'days');
+	} else if (shiftType === ShiftAmount.month) {
+		shiftedStart = originalStart.clone().subtract(1, 'months');
+	} else if (shiftType === ShiftAmount.year) {
+		shiftedStart = originalStart.clone().subtract(1, 'years');
 	}
+
+	// Add the number of days in the original line to the shifted start to get the end.
+	// This means the original and shifted lines have the same number of days.
+	// Let moment decide the day since it may help with leap years, etc.
+	const originalDateRange = originalEnd.diff(originalStart, 'days');
+	const shiftedEnd = shiftedStart.clone().add(originalDateRange, 'days');
 
 	return { shiftedStart, shiftedEnd };
 }
 
-/**
- * This function check whether the original date range is leap year or the shifted date range is leap year.
- * If it is true, it warns user about shifting to (or from) a leap year to non leap year.
- * @param startDate original data start date
- * @param endDate original data end date
- * @param shiftOption shifting option
- */
-function checkLeapYear(startDate: moment.Moment, endDate: moment.Moment, shiftOption: ShiftAmount) {
-	const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftOption);
-	const originalIsLeapYear = startDate.isLeapYear() || endDate.isLeapYear();
-	const shiftedIsLeapYear = shiftedStart.isLeapYear() || shiftedEnd.isLeapYear();
+// /**
+//  * shifting date function to find the shifted start date and shifted end date
+//  * @param originalStart  start date of current graph data
+//  * @param originalEnd end date of current graph data
+//  * @param shiftType shifting amount in week, month, or year
+//  * @returns shifted start and shifted end dates for the new data
+//  */
+// export function shiftDate(originalStart: moment.Moment, originalEnd: moment.Moment, shiftType: ShiftAmount) {
+// 	let shiftedStart: moment.Moment;
+// 	let shiftedEnd: moment.Moment;
 
-	// Check if the original date range crosses Feb 29, which causes unaligned graph
-	const originalCrossFeb29 = (
-		startDate.isLeapYear() &&
-		startDate.isBefore(moment(`${startDate.year()}-03-01`)) &&
-		endDate.isAfter(moment(`${startDate.year()}-02-28`))
-	);
+// 	const originalRangeDays = originalEnd.diff(originalStart, 'days');
 
-	// Check if the shifted date range crosses Feb 29, which causes unaligned graph
-	const shiftedCrossFeb29 = (
-		shiftedStart.isLeapYear() &&
-		shiftedStart.isBefore(moment(`${shiftedStart.year()}-03-01`)) &&
-		shiftedEnd.isAfter(moment(`${shiftedStart.year()}-02-28`))
-	);
+// 	switch (shiftType) {
+// 		case 'none':
+// 			shiftedStart = originalStart.clone();
+// 			shiftedEnd = originalEnd.clone();
+// 			break;
 
-	if (originalCrossFeb29 && !shiftedIsLeapYear) {
-		showWarnNotification(translate('original.data.crosses.leap.year.to.non.leap.year'));
-	} else if (shiftedCrossFeb29 && !originalIsLeapYear) {
-		showWarnNotification(translate('shifted.data.crosses.leap.year.to.non.leap.year'));
-	}
-}
+// 		case 'week':
+// 			shiftedStart = originalStart.clone().subtract(7, 'days');
+// 			shiftedEnd = originalEnd.clone().subtract(7, 'days');
+// 			break;
+
+// 		case 'month':
+// 			shiftedStart = originalStart.clone().subtract(1, 'months');
+// 			shiftedEnd = shiftedStart.clone().add(originalRangeDays, 'days');
+
+// 			if (shiftedEnd.isSameOrAfter(originalStart)) {
+// 				shiftedEnd = originalStart.clone().subtract(1, 'day');
+// 			} else if (originalStart.date() === 1 && originalEnd.date() === originalEnd.daysInMonth()) {
+// 				if (!(shiftedStart.date() === 1 && shiftedEnd.date() === shiftedEnd.daysInMonth())) {
+// 					shiftedEnd = shiftedStart.clone().endOf('month');
+// 				}
+// 			}
+// 			break;
+
+// 		case 'year':
+// 			shiftedStart = originalStart.clone().subtract(1, 'years');
+// 			shiftedEnd = originalEnd.clone().subtract(1, 'years');
+
+// 			if (originalStart.isLeapYear() && originalStart.month() === 1 && originalStart.date() === 29) {
+// 				shiftedStart = shiftedStart.month(2).date(1);
+// 			}
+// 			if (originalEnd.isLeapYear() && originalEnd.month() === 1 && originalEnd.date() === 29) {
+// 				shiftedEnd = shiftedEnd.month(1).date(28);
+// 			}
+// 			if (shiftedEnd.isSameOrAfter(originalStart)) {
+// 				shiftedEnd = originalStart.clone().subtract(1, 'day');
+// 			}
+// 			break;
+
+// 		default:
+// 			shiftedStart = originalStart.clone();
+// 			shiftedEnd = originalEnd.clone();
+// 	}
+
+// 	return { shiftedStart, shiftedEnd };
+// }
+
+// /**
+//  * This function check whether the original date range is leap year or the shifted date range is leap year.
+//  * If it is true, it warns user about shifting to (or from) a leap year to non leap year.
+//  * @param startDate original data start date
+//  * @param endDate original data end date
+//  * @param shiftOption shifting option
+//  */
+// function checkLeapYear(startDate: moment.Moment, endDate: moment.Moment, shiftOption: ShiftAmount) {
+// 	const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftOption);
+// 	const originalIsLeapYear = startDate.isLeapYear() || endDate.isLeapYear();
+// 	const shiftedIsLeapYear = shiftedStart.isLeapYear() || shiftedEnd.isLeapYear();
+
+// 	// Check if the original date range crosses Feb 29, which causes unaligned graph
+// 	const originalCrossFeb29 = (
+// 		startDate.isLeapYear() &&
+// 		startDate.isBefore(moment(`${startDate.year()}-03-01`)) &&
+// 		endDate.isAfter(moment(`${startDate.year()}-02-28`))
+// 	);
+
+// 	// Check if the shifted date range crosses Feb 29, which causes unaligned graph
+// 	const shiftedCrossFeb29 = (
+// 		shiftedStart.isLeapYear() &&
+// 		shiftedStart.isBefore(moment(`${shiftedStart.year()}-03-01`)) &&
+// 		shiftedEnd.isAfter(moment(`${shiftedStart.year()}-02-28`))
+// 	);
+
+// 	if (originalCrossFeb29 && !shiftedIsLeapYear) {
+// 		showWarnNotification(translate('original.data.crosses.leap.year.to.non.leap.year'));
+// 	} else if (shiftedCrossFeb29 && !originalIsLeapYear) {
+// 		showWarnNotification(translate('shifted.data.crosses.leap.year.to.non.leap.year'));
+// 	}
+// }

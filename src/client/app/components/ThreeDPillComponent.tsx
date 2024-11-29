@@ -127,7 +127,7 @@ const pillContainer: React.CSSProperties = {
 	justifyContent: 'space-between',
 	margin: '0px',
 	padding: '0px',
-	minHeight: '100px',
+	minHeight: '50px',
 	maxHeight: '200px'
 };
 

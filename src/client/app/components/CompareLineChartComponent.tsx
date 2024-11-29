@@ -4,6 +4,7 @@
 
 import { debounce } from 'lodash';
 import { utc } from 'moment';
+import * as moment from 'moment';
 import * as React from 'react';
 import Plot from 'react-plotly.js';
 import { TimeInterval } from '../../../common/TimeInterval';
@@ -21,8 +22,10 @@ import ThreeDPillComponent from './ThreeDPillComponent';
 import { selectThreeDComponentInfo } from '../redux/selectors/threeDSelectors';
 import { selectPlotlyGroupData, selectPlotlyMeterData } from '../redux/selectors/lineChartSelectors';
 import { MeterOrGroup, ShiftAmount } from '../types/redux/graph';
-import { PlotRelayoutEvent } from 'plotly.js';
 import { shiftDate } from './CompareLineControlsComponent';
+import { showInfoNotification, showWarnNotification } from '../utils/notifications';
+import { PlotRelayoutEvent } from 'plotly.js';
+
 /**
  * @returns plotlyLine graphic
  */
@@ -81,16 +84,11 @@ export default function CompareLineChartComponent() {
 
 	// Update shift interval string based on shift interval or time interval
 	React.useEffect(() => {
-		const shiftStart = shiftInterval.getStartTimestamp();
-		const shiftEnd = shiftInterval.getEndTimestamp();
-
-		if (shiftStart && shiftEnd) {
+		if (shiftInterval.getIsBounded()) {
 			setShiftIntervalStr(shiftInterval);
 		} else {
 			// If shift interval is not set, use the original time interval
-			const startDate = timeInterval.getStartTimestamp();
-			const endDate = timeInterval.getEndTimestamp();
-			if (startDate && endDate) {
+			if (timeInterval.getIsBounded()) {
 				setShiftIntervalStr(timeInterval);
 			}
 		}
@@ -127,14 +125,19 @@ export default function CompareLineChartComponent() {
 
 	// Customize the layout of the plot
 	// See https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497 for showing text `not plot.
-	if (!graphState.threeD.meterOrGroup && (data.length === 0 || dataNew.length === 0)) {
+	if (!meterOrGroupID) {
 		return <><ThreeDPillComponent /><h1>{`${translate('select.meter.group')}`}</h1></>;
 	} else if (!timeInterval.getIsBounded()) {
 		return <><ThreeDPillComponent /><h1>{`${translate('please.set.the.date.range')}`}</h1></>;
 	} else if (!enoughData) {
 		return <><ThreeDPillComponent /><h1>{`${translate('no.data.in.range')}`}</h1></>;
 	} else {
-		// adding information to the shifted data so that it can be plotted on the same graph with current data
+		// Checks/warnings on received reading data
+		if (timeInterval.getIsBounded() && shiftInterval.getIsBounded()) {
+			checkReceivedData(data[0].x, dataNew[0].x);
+		}
+
+		// Adding information to the shifted data so that it can be plotted on the same graph with current data
 		const updateDataNew = dataNew.map(item => ({
 			...item,
 			name: 'Shifted ' + item.name,
@@ -149,16 +152,15 @@ export default function CompareLineChartComponent() {
 			<>
 				<ThreeDPillComponent />
 				<Plot
-					// only plot shifted data if the shiftAmount has been chosen
+					// Only plot shifted data if the shiftAmount has been chosen
 					data={shiftAmount === ShiftAmount.none ? [...data] : [...data, ...updateDataNew]}
-					style={{ width: '100%', height: '100%', minHeight: '750px' }}
+					style={{ width: '100%', height: '100%', minHeight: '700px' }}
 					layout={{
 						autosize: true, showlegend: true,
 						legend: { x: 0, y: 1.1, orientation: 'h' },
 						// 'fixedrange' on the yAxis means that dragging is only allowed on the xAxis which we utilize for selecting dateRanges
 						yaxis: { title: unitLabel, gridcolor: '#ddd', fixedrange: true },
 						xaxis: {
-							rangeslider: { visible: true },
 							// Set range for x-axis based on timeIntervalStr so that current data and shifted data is aligned
 							range: timeIntervalStr.getIsBounded()
 								? [timeIntervalStr.getStartTimestamp(), timeIntervalStr.getEndTimestamp()]
@@ -209,4 +211,65 @@ export default function CompareLineChartComponent() {
 		);
 
 	}
+}
+
+/**
+ * If the number of points differs for the original and shifted lines, the data will not appear at the same places horizontally.
+ * The time interval in the original and shifted line for the actual readings can have issues.
+ * While the requested time ranges should be the same, the actually returned readings may differ.
+ * This can happen if there are readings missing including start, end or between. If the number of readings vary then there is an issue.
+ * If not, it is unlikely but can happen if there are missing readings in both lines that do not align but there are the same number missing in both.
+ * This is an ugly edge case that OED is not going to try to catch now.
+ * Use the last index in Redux state as a proxy for the number since need that below.
+ * @param originalReading original data to compare
+ * @param shiftedReading shifted data to compare
+ */
+function checkReceivedData(originalReading: any, shiftedReading: any) {
+	let numberPointsSame = true;
+	if (originalReading.length !== shiftedReading.length) {
+		// If the number of points vary then then scales will not line up point by point. Warn the user.
+		numberPointsSame = false;
+		showWarnNotification(`The original line has ${originalReading.length} readings but the shifted line has ${shiftedReading.length}`
+			+ ' readings which means the points will not align horizontally.');
+	}
+	// Now see if the original and shifted lines overlap.
+	if (moment(shiftedReading.at(-1).toString()) > moment(originalReading.at(0).toString())) {
+		showInfoNotification(`The shifted line overlaps the original line starting at ${originalReading[0]}`);
+	}
+	// Now see if day of the week aligns.
+	// If the number of points is not the same then no horizontal alignment so do not tell user.
+	if (numberPointsSame && moment(originalReading.at(0)?.toString()).day() === moment(shiftedReading.at(0)?.toString()).day()) {
+		showInfoNotification('days of week align (unless missing readings)');
+	}
+	// Now see if the month and day align. If the number of points is not the same then no horizontal
+	// alignment so do not tell user. Check if the first reading matches because only notify if this is true.
+	if (numberPointsSame && monthDateSame(moment(originalReading.at(0)?.toString()), moment(shiftedReading.at(0)?.toString()))) {
+		// Loop over all readings but the first. Really okay to do first but just checked that one.
+		// Note length of original and shifted same so just use original.
+		let message = 'The month and day of the month align for the original and shifted readings';
+		for (let i = 1; i < originalReading.length; i++) {
+			if (!monthDateSame(moment(originalReading.at(i)?.toString()), moment(shiftedReading.at(i)?.toString()))) {
+				// Mismatch so inform user. Should be due to leap year crossing and differing leap year.
+				// Only tell first mistmatch
+				message += ` until original reading at date ${moment(originalReading.at(i)?.toString()).format('ll')}`;
+			}
+		}
+		showInfoNotification(message);
+	}
+}
+
+/**
+ * Check if the two dates have the same date and month
+ * @param firstDate first date to compare
+ * @param secondDate second date to compare
+ * @returns true if the month and date are the same
+ */
+function monthDateSame(firstDate: moment.Moment, secondDate: moment.Moment) {
+	// The month (0 up numbering) and date (day of month with 1 up numbering) must match.
+	// The time could be checked but the granulatity should be the same for original and
+	// shifted readings and only mismatch if there is missing readings. In the unlikely
+	// event of having the same number of points but different missing readings then
+	// the first one will mismatch the month or day unless those happen to match in which
+	// case it is still true that they are generally okay so ignore all this.
+	return firstDate.month() === secondDate.month() && firstDate.date() === secondDate.date();
 }
