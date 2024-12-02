@@ -2,13 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { debounce } from 'lodash';
-import { utc } from 'moment';
 import * as moment from 'moment';
 import * as React from 'react';
 import Plot from 'react-plotly.js';
 import { TimeInterval } from '../../../common/TimeInterval';
-import { updateSliderRange } from '../redux/actions/extraActions';
 import { readingsApi, stableEmptyLineReadings } from '../redux/api/readingsApi';
 import { useAppDispatch, useAppSelector } from '../redux/reduxHooks';
 import { selectCompareLineQueryArgs } from '../redux/selectors/chartQuerySelectors';
@@ -17,15 +14,15 @@ import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
 import Locales from '../types/locales';
 import translate from '../utils/translate';
 import SpinnerComponent from './SpinnerComponent';
-import { selectGraphState, selectShiftAmount, selectShiftTimeInterval, updateShiftTimeInterval } from '../redux/slices/graphSlice';
+import { selectGraphState, selectShiftAmount, updateShiftTimeInterval } from '../redux/slices/graphSlice';
 import ThreeDPillComponent from './ThreeDPillComponent';
 import { selectThreeDComponentInfo } from '../redux/selectors/threeDSelectors';
 import { selectPlotlyGroupData, selectPlotlyMeterData } from '../redux/selectors/lineChartSelectors';
 import { MeterOrGroup, ShiftAmount } from '../types/redux/graph';
 import { shiftDate } from './CompareLineControlsComponent';
 import { showInfoNotification, showWarnNotification } from '../utils/notifications';
-import { PlotRelayoutEvent } from 'plotly.js';
 import { setHelpLayout } from './ThreeDComponent';
+import { toast } from 'react-toastify';
 
 /**
  * @returns plotlyLine graphic
@@ -36,13 +33,11 @@ export default function CompareLineChartComponent() {
 	const meterOrGroupID = useAppSelector(selectThreeDComponentInfo).meterOrGroupID;
 	const unitLabel = useAppSelector(selectLineUnitLabel);
 	const locale = useAppSelector(selectSelectedLanguage);
-	const shiftInterval = useAppSelector(selectShiftTimeInterval);
 	const shiftAmount = useAppSelector(selectShiftAmount);
 	const { args, shouldSkipQuery, argsDeps } = useAppSelector(selectCompareLineQueryArgs);
-
 	// getting the time interval of current data
 	const timeInterval = graphState.queryTimeInterval;
-
+	const shiftInterval = graphState.shiftTimeInterval;
 	// Storing the time interval strings for the original data and the shifted data to use for range in plot
 	const [timeIntervalStr, setTimeIntervalStr] = React.useState(TimeInterval.unbounded());
 	const [shiftIntervalStr, setShiftIntervalStr] = React.useState(TimeInterval.unbounded());
@@ -73,12 +68,13 @@ export default function CompareLineChartComponent() {
 
 	// Update shifted interval based on current interval and shift amount
 	React.useEffect(() => {
-		const startDate = timeInterval.getStartTimestamp();
-		const endDate = timeInterval.getEndTimestamp();
+		console.log('first effect is being called');
 
-		if (startDate && endDate) {
+		if (timeInterval.getIsBounded()) {
 			setTimeIntervalStr(timeInterval);
 			if (shiftAmount !== ShiftAmount.none && shiftAmount !== ShiftAmount.custom) {
+				const startDate = timeInterval.getStartTimestamp();
+				const endDate = timeInterval.getEndTimestamp();
 				const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftAmount);
 				dispatch(updateShiftTimeInterval(new TimeInterval(shiftedStart, shiftedEnd)));
 			}
@@ -87,15 +83,11 @@ export default function CompareLineChartComponent() {
 
 	// Update shift interval string based on shift interval or time interval
 	React.useEffect(() => {
+		console.log('second effect is being called, and shift interval is', shiftInterval.getIsBounded());
 		if (shiftInterval.getIsBounded()) {
 			setShiftIntervalStr(shiftInterval);
-		} else {
-			// If shift interval is not set, use the original time interval
-			if (timeInterval.getIsBounded()) {
-				setShiftIntervalStr(timeInterval);
-			}
 		}
-	}, [shiftInterval, timeInterval]);
+	}, [shiftInterval]);
 
 	// Getting the shifted data
 	const { data: dataNew, isFetching: isFetchingNew } = graphState.threeD.meterOrGroup === MeterOrGroup.meters ?
@@ -126,13 +118,14 @@ export default function CompareLineChartComponent() {
 	// See https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497 for showing text `not plot.
 	if (!meterOrGroupID) {
 		layout = setHelpLayout(translate('select.meter.group'));
-	} else if (!timeInterval.getIsBounded()) {
+	} else if (!timeIntervalStr.getIsBounded() || !shiftIntervalStr.getIsBounded()) {
 		layout = setHelpLayout(translate('please.set.the.date.range'));
 	} else if (!enoughData) {
 		layout = setHelpLayout(translate('no.data.in.range'));
 	} else {
 		// Checks/warnings on received reading data
-		if (timeInterval.getIsBounded() && shiftInterval.getIsBounded()) {
+		if (shiftAmount !== ShiftAmount.none && !isFetching && !isFetchingNew) {
+			console.log('shift amount', shiftAmount);
 			checkReceivedData(data[0], dataNew[0]);
 		}
 		layout = {
@@ -178,7 +171,7 @@ export default function CompareLineChartComponent() {
 				: <Plot
 					// Only plot shifted data if the shiftAmount has been chosen
 					data={shiftAmount === ShiftAmount.none ? [...data] : [...data, ...updateDataNew]}
-					style={{ width: '100%', height: '100%', minHeight: '700px' }}
+					style={{ width: '100%', height: '100%', minHeight: '750px' }}
 					layout={layout}
 					config={{
 						responsive: true,
@@ -188,26 +181,6 @@ export default function CompareLineChartComponent() {
 						// Available Locales
 						locales: Locales
 					}}
-					onRelayout={debounce(
-						(e: PlotRelayoutEvent) => {
-							// This event emits an object that contains values indicating changes in the user's graph, such as zooming.
-							if (e['xaxis.range[0]'] && e['xaxis.range[1]']) {
-								// The event signals changes in the user's interaction with the graph.
-								// this will automatically trigger a refetch due to updating a query arg.
-								const startTS = utc(e['xaxis.range[0]']);
-								const endTS = utc(e['xaxis.range[1]']);
-								const workingTimeInterval = new TimeInterval(startTS, endTS);
-								dispatch(updateSliderRange(workingTimeInterval));
-							}
-							else if (e['xaxis.range']) {
-								// this case is when the slider knobs are dragged.
-								const range = e['xaxis.range']!;
-								const startTS = range && range[0];
-								const endTS = range && range[1];
-								dispatch(updateSliderRange(new TimeInterval(utc(startTS), utc(endTS))));
-							}
-						}, 500, { leading: false, trailing: true })
-					}
 				/>
 			}
 
@@ -235,17 +208,26 @@ function checkReceivedData(originalData: any, shiftedData: any) {
 	if (originalReading.length !== shiftedReading.length) {
 		// If the number of points vary then then scales will not line up point by point. Warn the user.
 		numberPointsSame = false;
-		showWarnNotification(`The original line has ${originalReading.length} readings but the shifted line has ${shiftedReading.length}`
-			+ ' readings which means the points will not align horizontally.');
+		showWarnNotification(
+			`The original line has ${originalReading.length} readings but the shifted line has ${shiftedReading.length}`
+			+ ' readings which means the points will not align horizontally.'
+		);
 	}
 	// Now see if the original and shifted lines overlap.
 	if (moment(shiftedReading.at(-1).toString()) > moment(originalReading.at(0).toString())) {
-		showInfoNotification(`The shifted line overlaps the original line starting at ${originalReading[0]}`);
+		showInfoNotification(
+			`The shifted line overlaps the original line starting at ${originalReading[0]}`,
+			toast.POSITION.TOP_RIGHT,
+			15000
+		);
 	}
 	// Now see if day of the week aligns.
 	// If the number of points is not the same then no horizontal alignment so do not tell user.
 	if (numberPointsSame && moment(originalReading.at(0)?.toString()).day() === moment(shiftedReading.at(0)?.toString()).day()) {
-		showInfoNotification('days of week align (unless missing readings)');
+		showInfoNotification('Days of week align (unless missing readings)',
+			toast.POSITION.TOP_RIGHT,
+			15000
+		);
 	}
 	// Now see if the month and day align. If the number of points is not the same then no horizontal
 	// alignment so do not tell user. Check if the first reading matches because only notify if this is true.
@@ -258,9 +240,10 @@ function checkReceivedData(originalData: any, shiftedData: any) {
 				// Mismatch so inform user. Should be due to leap year crossing and differing leap year.
 				// Only tell first mistmatch
 				message += ` until original reading at date ${moment(originalReading.at(i)?.toString()).format('ll')}`;
+				break;
 			}
 		}
-		showInfoNotification(message);
+		showInfoNotification(message, toast.POSITION.TOP_RIGHT, 15000);
 	}
 }
 

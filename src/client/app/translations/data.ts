@@ -7,6 +7,7 @@
 // This file used to be a json file, but had issues with importing, so we declared the json variable in a js file instead.
 const LocaleTranslationData = {
 	"en": {
+		"1.day": "1 day",
 		"1.month": "1 month",
 		"1.week": "1 week",
 		"1.year": "1 year",
@@ -540,6 +541,7 @@ const LocaleTranslationData = {
 		"you.cannot.create.a.cyclic.group": "You cannot create a cyclic group"
 	},
 	"fr": {
+		"1.day": "1 day\u{26A1}",
 		"1.month": "1 month\u{26A1}",
 		"1.week": "1 week\u{26A1}",
 		"1.year": "1 year\u{26A1}",
@@ -1073,6 +1075,7 @@ const LocaleTranslationData = {
 		'threeD.y.axis.label': 'Jours de l\'année calendaire',
 	},
 	"es": {
+		"1.day": "1 day\u{26A1}",
 		"1.month": "1 month\u{26A1}",
 		"1.week": "1 week\u{26A1}",
 		"1.year": "1 year\u{26A1}",

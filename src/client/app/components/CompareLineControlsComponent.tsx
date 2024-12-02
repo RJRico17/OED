@@ -92,6 +92,7 @@ export default function CompareLineControlsComponent() {
 					onChange={e => handleShiftOptionChange(e.target.value)}
 				>
 					<option value="none" hidden disabled>{translate('select.shift.amount')}</option>
+					<option value="day">{translate('1.day')}</option>
 					<option value="week">{translate('1.week')}</option>
 					<option value="month">{translate('1.month')}</option>
 					<option value="year">{translate('1.year')}</option>
@@ -127,6 +128,8 @@ export function shiftDate(originalStart: moment.Moment, originalEnd: moment.Mome
 
 	if (shiftType === ShiftAmount.none) {
 		shiftedStart = originalStart.clone();
+	} else if (shiftType === ShiftAmount.day) {
+		shiftedStart = originalStart.clone().subtract(1, 'days');
 	} else if (shiftType === ShiftAmount.week) {
 		shiftedStart = originalStart.clone().subtract(7, 'days');
 	} else if (shiftType === ShiftAmount.month) {

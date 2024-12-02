@@ -57,6 +57,7 @@ export interface ThreeDState {
 }
 
 export enum ShiftAmount {
+	day = 'day',
 	week = 'week',
 	month = 'month',
 	year = 'year',
