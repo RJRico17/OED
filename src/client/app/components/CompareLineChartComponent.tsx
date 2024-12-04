@@ -5,21 +5,19 @@
 import * as moment from 'moment';
 import * as React from 'react';
 import Plot from 'react-plotly.js';
-import { TimeInterval } from '../../../common/TimeInterval';
 import { readingsApi, stableEmptyLineReadings } from '../redux/api/readingsApi';
-import { useAppDispatch, useAppSelector } from '../redux/reduxHooks';
+import { useAppSelector } from '../redux/reduxHooks';
 import { selectCompareLineQueryArgs } from '../redux/selectors/chartQuerySelectors';
 import { selectLineUnitLabel } from '../redux/selectors/plotlyDataSelectors';
 import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
 import Locales from '../types/locales';
 import translate from '../utils/translate';
 import SpinnerComponent from './SpinnerComponent';
-import { selectGraphState, selectShiftAmount, updateShiftTimeInterval } from '../redux/slices/graphSlice';
+import { selectGraphState, selectShiftAmount } from '../redux/slices/graphSlice';
 import ThreeDPillComponent from './ThreeDPillComponent';
 import { selectThreeDComponentInfo } from '../redux/selectors/threeDSelectors';
 import { selectPlotlyGroupData, selectPlotlyMeterData } from '../redux/selectors/lineChartSelectors';
 import { MeterOrGroup, ShiftAmount } from '../types/redux/graph';
-import { shiftDate } from './CompareLineControlsComponent';
 import { showInfoNotification, showWarnNotification } from '../utils/notifications';
 import { setHelpLayout } from './ThreeDComponent';
 import { toast } from 'react-toastify';
@@ -28,7 +26,6 @@ import { toast } from 'react-toastify';
  * @returns plotlyLine graphic
  */
 export default function CompareLineChartComponent() {
-	const dispatch = useAppDispatch();
 	const graphState = useAppSelector(selectGraphState);
 	const meterOrGroupID = useAppSelector(selectThreeDComponentInfo).meterOrGroupID;
 	const unitLabel = useAppSelector(selectLineUnitLabel);
@@ -63,19 +60,6 @@ export default function CompareLineChartComponent() {
 				})
 			});
 
-	// Update shifted interval based on current interval and shift amount
-	React.useEffect(() => {
-		if (timeInterval.getIsBounded()) {
-			// setTimeIntervalStr(timeInterval);
-			if (shiftAmount !== ShiftAmount.none && shiftAmount !== ShiftAmount.custom) {
-				const startDate = timeInterval.getStartTimestamp();
-				const endDate = timeInterval.getEndTimestamp();
-				const { shiftedStart, shiftedEnd } = shiftDate(startDate, endDate, shiftAmount);
-				dispatch(updateShiftTimeInterval(new TimeInterval(shiftedStart, shiftedEnd)));
-			}
-		}
-	}, [timeInterval, shiftAmount]);
-
 	// Getting the shifted data
 	const { data: dataNew, isFetching: isFetchingNew } = graphState.threeD.meterOrGroup === MeterOrGroup.meters ?
 		readingsApi.useLineQuery({ ...args, timeInterval: shiftInterval.toString() },
@@ -106,15 +90,14 @@ export default function CompareLineChartComponent() {
 	if (!meterOrGroupID) {
 		layout = setHelpLayout(translate('select.meter.group'));
 	} else if (!timeInterval.getIsBounded() || !shiftInterval.getIsBounded()) {
-		console.log('shiftInterval', shiftInterval);
 		layout = setHelpLayout(translate('please.set.the.date.range'));
 	} else if (shiftAmount === ShiftAmount.none) {
 		layout = setHelpLayout(translate('select.shift.amount'));
 	} else if (!enoughData) {
 		layout = setHelpLayout(translate('no.data.in.range'));
 	} else {
-		// Checks/warnings on received reading data
 		if (!isFetching && !isFetchingNew) {
+			// Checks/warnings on received reading data
 			checkReceivedData(data[0], dataNew[0]);
 		}
 		layout = {
@@ -159,7 +142,7 @@ export default function CompareLineChartComponent() {
 				? <SpinnerComponent loading height={50} width={50} />
 				: <Plot
 					// Only plot shifted data if the shiftAmount has been chosen
-					data={shiftAmount === ShiftAmount.none ? [...data] : [...data, ...updateDataNew]}
+					data={shiftAmount === ShiftAmount.none ? [] : [...data, ...updateDataNew]}
 					style={{ width: '100%', height: '100%', minHeight: '750px' }}
 					layout={layout}
 					config={{
