@@ -1209,7 +1209,6 @@ const LocaleTranslationData = {
 		"default.meter.minimum.value": "Revisión del valor de lectura mínima del medidor predeterminado",
 		"default.meter.reading.frequency": "Frecuencia de lectura del medidor predeterminada",
 		"default.meter.reading.gap": "Deistancia predeterminada entre lecturas del medidor",
-		"default.site.title": "Título predeterminado de la página ",
 		"default.time.zone": "Zona de horario predeterminada",
 		"default.warning.file.size": "Advertencia predeterminada de tamaño del archivo",
 		"defaultGraphicUnit": "Unidad del gráfico predeterminada:",
