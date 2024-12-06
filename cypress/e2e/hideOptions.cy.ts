@@ -17,7 +17,18 @@ describe("Options Menu Tests", () => {
     cy.get("#header > div > div.col-4.justify-content-end.d-lg-flex.d-none > div > nav > div > ul > a:nth-child(4)").should("not.exist"); // help
     
 
-    
+
+    // Click "Menu" again to toggle visibility back
+    cy.get("#header > div > div.col-4.justify-content-end.d-lg-flex.d-none > div > button").click();
+    cy.get("body > div:nth-child(4) > div > div.modal.fade.show > div > div > div.modal-header > div > h6 > div > nav > div > ul > li:nth-child(3) > a").click();
+    cy.get("body > div:nth-child(4) > div > div.modal.fade.show > div > div > div.modal-header > div > h6 > div > nav > div > ul > li.dropdown.show.nav-item > div > button:nth-child(2)").click();
+
+
+
+    cy.get("#header > div > div.col-4.justify-content-end.d-lg-flex.d-none > div > nav > div > ul > li:nth-child(2) > a").should("be.visible"); // pages
+    cy.get("#header > div > div.col-4.justify-content-end.d-lg-flex.d-none > div > nav > div > ul > li:nth-child(3) > a").should("be.visible"); // options
+    cy.get("#header > div > div.col-4.justify-content-end.d-lg-flex.d-none > div > nav > div > ul > a:nth-child(4)").should("be.visible"); // help
+
 
   });
 });
