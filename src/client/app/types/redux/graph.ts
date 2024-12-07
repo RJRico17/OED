@@ -57,12 +57,12 @@ export interface ThreeDState {
 }
 
 export enum ShiftAmount {
+	none = 'none',
 	day = 'day',
 	week = 'week',
 	month = 'month',
 	year = 'year',
-	custom = 'custom',
-	none = 'none'
+	custom = 'custom'
 }
 
 export interface GraphState {

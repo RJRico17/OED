@@ -98,7 +98,7 @@ export default function CompareLineChartComponent() {
 	} else {
 		if (!isFetching && !isFetchingNew) {
 			// Checks/warnings on received reading data
-			checkReceivedData(data[0], dataNew[0]);
+			checkReceivedData(data[0].x, dataNew[0].x);
 		}
 		layout = {
 			autosize: true, showlegend: true,
@@ -170,12 +170,10 @@ export default function CompareLineChartComponent() {
  * If not, it is unlikely but can happen if there are missing readings in both lines that do not align but there are the same number missing in both.
  * This is an ugly edge case that OED is not going to try to catch now.
  * Use the last index in Redux state as a proxy for the number since need that below.
- * @param originalData original data to compare
- * @param shiftedData shifted data to compare
+ * @param originalReading original data to compare
+ * @param shiftedReading shifted data to compare
  */
-function checkReceivedData(originalData: any, shiftedData: any) {
-	const originalReading = originalData.x;
-	const shiftedReading = shiftedData.x;
+function checkReceivedData(originalReading: any, shiftedReading: any) {
 	let numberPointsSame = true;
 	if (originalReading.length !== shiftedReading.length) {
 		// If the number of points vary then then scales will not line up point by point. Warn the user.

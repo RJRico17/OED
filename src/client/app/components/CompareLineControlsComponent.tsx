@@ -17,6 +17,7 @@ import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
 import { Value } from '@wojtekmaj/react-daterange-picker/dist/cjs/shared/types';
 import * as moment from 'moment';
 import { TimeInterval } from '../../../common/TimeInterval';
+import TooltipMarkerComponent from './TooltipMarkerComponent';
 
 /**
  * @returns compare line control component for compare line graph page
@@ -27,34 +28,36 @@ export default function CompareLineControlsComponent() {
 	const timeInterval = useAppSelector(selectQueryTimeInterval);
 	const locale = useAppSelector(selectSelectedLanguage);
 	const shiftInterval = useAppSelector(selectShiftTimeInterval);
-
-	// Hold value of shifting option (week, month, year, or custom)
-	const [shiftOption, setShiftOption] = React.useState<ShiftAmount>(shiftAmount);
 	// Hold value to store the custom date range for the shift interval
 	const [customDateRange, setCustomDateRange] = React.useState<TimeInterval>(shiftInterval);
 
+	// Translation for shift amount
+	const shiftAmountTranslations: Record<keyof typeof ShiftAmount, string> = {
+		none: 'select.shift.amount',
+		day: '1.day',
+		week: '1.week',
+		month: '1.month',
+		year: '1.year',
+		custom: 'custom.date.range'
+	};
+
 	// Update the shift interval when the shift option changes
 	React.useEffect(() => {
-		if (shiftOption !== ShiftAmount.custom && timeInterval.getIsBounded()) {
-			const { shiftedStart, shiftedEnd } = shiftDate(timeInterval.getStartTimestamp(), timeInterval.getEndTimestamp(), shiftOption);
+		if (shiftAmount !== ShiftAmount.custom && timeInterval.getIsBounded()) {
+			const { shiftedStart, shiftedEnd } = shiftDate(timeInterval.getStartTimestamp(), timeInterval.getEndTimestamp(), shiftAmount);
 			const newInterval = new TimeInterval(shiftedStart, shiftedEnd);
 			dispatch(updateShiftTimeInterval(newInterval));
+			// set the custom date range to the new interval
+			setCustomDateRange(newInterval);
 		}
-	}, [shiftOption, timeInterval]);
-
-	// Update custom date range value when shift interval changes
-	React.useEffect(() => {
-		setCustomDateRange(shiftInterval);
-	}, [shiftInterval]);
+	}, [shiftAmount, timeInterval]);
 
 	// Handle changes in shift option (week, month, year, or custom)
 	const handleShiftOptionChange = (value: string) => {
 		if (value === 'custom') {
-			setShiftOption(ShiftAmount.custom);
 			dispatch(updateShiftAmount(ShiftAmount.custom));
 		} else {
 			const newShiftOption = value as ShiftAmount;
-			setShiftOption(newShiftOption);
 			dispatch(updateShiftAmount(newShiftOption));
 		}
 	};
@@ -70,25 +73,31 @@ export default function CompareLineControlsComponent() {
 			<div key='side-options'>
 				<p style={{ fontWeight: 'bold', margin: 0 }}>
 					<FormattedMessage id='shift.date.interval' />
-					{/* <TooltipMarkerComponent helpTextId='help.shift.date.interval' /> // TODO: Add later */}
+					<TooltipMarkerComponent page={'home'} helpTextId='help.shift.date.interval' />
 				</p>
 				<Input
 					id='shiftDateInput'
 					name='shiftDateInput'
 					type='select'
-					value={shiftOption}
+					value={shiftAmount}
 					invalid={shiftAmount === ShiftAmount.none}
 					onChange={e => handleShiftOptionChange(e.target.value)}
 				>
-					<option value="none" hidden disabled>{translate('select.shift.amount')}</option>
-					<option value="day">{translate('1.day')}</option>
-					<option value="week">{translate('1.week')}</option>
-					<option value="month">{translate('1.month')}</option>
-					<option value="year">{translate('1.year')}</option>
-					<option value="custom">{translate('custom.date.range')}</option>
+					{Object.entries(ShiftAmount).map(
+						([key, value]) => (
+							<option
+								hidden={value === 'none'}
+								disabled={value === 'none'}
+								value={value}
+								key={key}
+							>
+								{translate(shiftAmountTranslations[key as keyof typeof ShiftAmount])}
+							</option>
+						)
+					)}
 				</Input>
 				{/* Show date picker when custom date range is selected */}
-				{shiftOption === ShiftAmount.custom &&
+				{shiftAmount === ShiftAmount.custom &&
 					<DateRangePicker
 						value={timeIntervalToDateRange(customDateRange)}
 						onChange={handleCustomShiftDateChange}
