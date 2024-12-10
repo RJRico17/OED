@@ -11,6 +11,11 @@ describe("Navigation to Groups Page", () => {
     // Click the 'Groups' option in the dropdown
     cy.contains("Groups").click();
 
+    // Verify that the Groups page has the correct title
+    cy.get("h2").should("have.text", "Groups");
 
+    // Verify the tooltip icon is present in the title
+    cy.get("h2 > div > i").should("have.attr", "data-for", "groups");
+    cy.get("h2 > div > i").should("have.attr", "data-tip", "help.groups.groupview");
   });
 });
