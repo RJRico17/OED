@@ -25,6 +25,7 @@ import RoleOutlet from './router/RoleOutlet';
 import UnitsDetailComponent from './unit/UnitsDetailComponent';
 import ErrorComponent from './router/ErrorComponent';
 import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
+import LogMsgComponent from './admin/LogMsgComponent';
 import VisualUnitDetailComponent from './visual-unit/VisualUnitDetailComponent';
 
 /**
@@ -59,6 +60,8 @@ const router = createBrowserRouter([
 					{ path: 'csvMeters', element: <MetersCSVUploadComponent /> },
 					{ path: 'maps', element: <MapsDetailContainer /> },
 					{ path: 'units', element: <UnitsDetailComponent /> },
+					{ path: 'users', element: <UsersDetailComponent /> },
+					{ path: 'logmsg', element: <LogMsgComponent /> },
 					{ path: 'users', element: <UsersDetailComponent /> },
 					{ path: 'visual-unit', element: <VisualUnitDetailComponent/> }
 				]

@@ -64,6 +64,7 @@ export default function HeaderButtonsComponent() {
 		shouldCSVReadingsButtonDisabled: true,
 		shouldUnitsButtonDisabled: true,
 		shouldConversionsButtonDisabled: true,
+		shouldLogMsgButtonDisabled: true,
 		shouldVisualUnitMapButtonDisabled: true,
 		// Translated menu title that depend on whether logged in.
 		menuTitle: '',
@@ -101,6 +102,7 @@ export default function HeaderButtonsComponent() {
 			shouldCSVReadingsButtonDisabled: pathname === '/csvReadings',
 			shouldUnitsButtonDisabled: pathname === '/units',
 			shouldConversionsButtonDisabled: pathname === '/conversions',
+			shouldLogMsgButtonDisabled: pathname === '/logmsg',
 			shouldVisualUnitMapButtonDisabled: pathname === '/visual-unit'
 		}));
 	}, [pathname]);
@@ -246,6 +248,13 @@ export default function HeaderButtonsComponent() {
 							</DropdownItem>
 							<DropdownItem
 								style={state.adminViewableLinkStyle}
+								disabled={state.shouldLogMsgButtonDisabled}
+								tag={Link}
+								to="/logmsg">
+								<FormattedMessage id='log.messages' />
+							</DropdownItem>
+							<DropdownItem
+								style={state.adminViewableLinkStyle}
 								disabled={state.shouldUsersButtonDisabled}
 								tag={Link}
 								to="/users">
@@ -306,7 +315,7 @@ export default function HeaderButtonsComponent() {
 						{translate('log.in')}
 					</ModalHeader>
 					<ModalBody>
-						<LoginComponent handleClose={handleClose}/>
+						<LoginComponent handleClose={handleClose} />
 					</ModalBody>
 				</Modal>
 			</>

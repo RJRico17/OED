@@ -68,13 +68,65 @@ mocha.describe('readings API', () => {
 						});
 					expectCompareToEqualExpected(res, expected);
 				});
+
 				// Add C4 here
 
-				// Add C5 here
+				mocha.it('C5: 7 day shift end 2022-11-01 15:00:00 (beyond data) for 15 minute reading intervals and quantity units & kWh as kWh', async () => {
+					await prepareTest(unitDatakWh, conversionDatakWh, meterDatakWh);
+					const unitId = await getUnitId('kWh');
+					const expected = [9132.81261972035, 13147.7382388332];
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
+						.query({
+							curr_start: '2022-10-30 00:00:00',
+							curr_end: '2022-11-01 15:00:00',
+							shift: 'P7D',
+							graphicUnitId: unitId
+						});
+					expectCompareToEqualExpected(res, expected);
+				});
 
 				// Add C6 here
 
-				// Add C8 here
+				mocha.it('C8: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as MJ', async () => {
+					// Use predefined unit and conversion data
+					const unitData = unitDatakWh.concat([
+						{
+							name: 'MJ',
+							identifier: 'megaJoules',
+							unitRepresent: Unit.unitRepresentType.QUANTITY,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.UNIT,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: false,
+							note: 'MJ'
+						}
+					]);
+					const conversionData = conversionDatakWh.concat([
+						{
+							sourceName: 'kWh',
+							destinationName: 'MJ',
+							bidirectional: true,
+							slope: 3.6,
+							intercept: 0,
+							note: 'kWh → MJ'
+						}
+					]);
+					// Prepare test with the standard data
+					await prepareTest(unitData, conversionData, meterDatakWh);
+					// Get the unit ID since the DB could use any value.
+					const unitId = await getUnitId('MJ');
+					const expected = [11232.0660730344, 12123.0051081528];
+					// for compare, need the unitID, currentStart, currentEnd, shift
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
+						.query({
+							curr_start: '2022-10-31 00:00:00',
+							curr_end: '2022-10-31 17:00:00',
+							shift: 'P1D',
+							graphicUnitId: unitId
+						});
+					expectCompareToEqualExpected(res, expected);
+				});
 
 				// Add C9 here
 

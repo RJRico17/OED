@@ -7,6 +7,7 @@
 	"scripts": {
 		"start": "node ./src/bin/www",
 		"start:dev": "nodemon --legacy-watch --inspect=0.0.0.0 ./src/bin/www",
+		"checkWebsiteStatus": "node src/server/services/checkWebsiteStatus.js",
 		"webpack:dev": "webpack watch --color --progress --mode development",
 		"webpack:build": "webpack build --node-env production",
 		"webpack": "webpack build --color --progress --mode development",
@@ -43,7 +44,8 @@
 		"generateCosineSquaredTestingData": "node -e 'require(\"./src/server/data/automatedTestingData\").generateCosineSquaredTestingData(2.5)'",
 		"generateTestingData": "node -e 'require(\"./src/server/data/automatedTestingData\").generateTestingData()'",
 		"testData": "node -e 'require(\"./src/server/data/automatedTestingData.js\").insertSpecialUnitsConversionsMetersGroups()'",
-		"webData": "node -e 'require(\"./src/server/data/websiteData.js\").insertWebsiteData()'"
+		"webData": "node -e 'require(\"./src/server/data/websiteData.js\").insertWebsiteData()'",
+		"addLogMsg": "node -e 'require(\"./src/server/services/addLogMsg.js\").addLogMsgToDB()'"
 	},
 	"nodemonConfig": {
 		"watch": [

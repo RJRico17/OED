@@ -51,10 +51,36 @@ mocha.describe('readings API', () => {
 						});
 					expectCompareToEqualExpected(res, expected, GROUP_ID);
 				});
-
-				// Add CG3 here
-
-				// Add CG4 here
+				mocha.it('CG3: 28 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as kWh ', async () => {
+					await prepareTest(unitDatakWh, conversionDatakWh, meterDatakWhGroups, groupDatakWh);
+					// Get the unit ID since the DB could use any value.
+					const unitId = await getUnitId('kWh');
+					const expected = [189951.689612281, 190855.90449004];
+					// for compare, need the unitID, currentStart, currentEnd, shift
+					const res = await chai.request(app).get(`/api/compareReadings/groups/${GROUP_ID}`)
+						.query({
+							curr_start: '2022-10-09 00:00:00',
+							curr_end: '2022-10-31 17:00:00',
+							shift: 'P28D',
+							graphicUnitId: unitId
+						});
+					expectCompareToEqualExpected(res, expected, GROUP_ID);
+				});
+				mocha.it('CG4: 1 day shift end 2022-11-01 00:00:00 (full day) for 15 minute reading intervals and quantity units & kWh as kWh', async () => {
+					await prepareTest(unitDatakWh, conversionDatakWh, meterDatakWhGroups, groupDatakWh);
+					// Get the unit ID since the DB could use any value.
+					const unitId = await getUnitId('kWh');
+					const expected = [7820.41927336775, 8351.13117114892];
+					// for compare, need the unitID, currentStart, currentEnd, shift
+					const res = await chai.request(app).get(`/api/compareReadings/groups/${GROUP_ID}`)
+						.query({
+							curr_start: '2022-10-31 00:00:00',
+							curr_end: '2022-11-01 00:00:00',
+							shift: 'P1D',
+							graphicUnitId: unitId
+						});
+					expectCompareToEqualExpected(res, expected, GROUP_ID);
+				});
 
 				// Add CG5 here
 

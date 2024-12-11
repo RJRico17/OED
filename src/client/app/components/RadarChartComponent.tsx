@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import { Layout } from 'plotly.js';
 import * as React from 'react';
 import Plot from 'react-plotly.js';
+import { Icons } from 'plotly.js';
 import { selectGroupDataById } from '../redux/api/groupsApi';
 import { selectMeterDataById } from '../redux/api/metersApi';
 import { readingsApi } from '../redux/api/readingsApi';
@@ -69,6 +70,14 @@ export default function RadarChartComponent() {
 	// The rate will be 1 if it is per hour (since state readings are per hour) or no rate scaling so no change.
 	const rateScaling = needsRateScaling ? currentSelectedRate.rate : 1;
 
+	// Display Plotly Buttons Feature
+	// The number of items in defaultButtons and advancedButtons must differ as discussed below
+	const defaultButtons: Plotly.ModeBarDefaultButtons[] = ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d',
+		'resetScale2d'];
+	const advancedButtons: Plotly.ModeBarDefaultButtons[] = ['select2d', 'lasso2d', 'autoScale2d', 'resetScale2d'];
+	// Manage button states with useState
+	const [listOfButtons, setListOfButtons] = React.useState(defaultButtons);
+
 	// Add all valid data from existing meters to the radar plot
 	for (const meterID of selectedMeters) {
 		if (meterReadings) {
@@ -80,11 +89,6 @@ export default function RadarChartComponent() {
 				if (readingsData) {
 					const label = entity.identifier;
 					const colorID = meterID;
-					// TODO If we are sure the data is always defined then remove this commented out code.
-					// Be consistent for all graphing and groups below.
-					// if (readingsData.readings === undefined) {
-					// 	throw new Error('Unacceptable condition: readingsData.readings is undefined.');
-					// }
 					// Create two arrays for the distance (rData) and angle (thetaData) values. Fill the array with the data from the line readings.
 					// HoverText is the popup value show for each reading.
 					const thetaData: string[] = [];
@@ -137,9 +141,6 @@ export default function RadarChartComponent() {
 				if (readingsData) {
 					const label = entity.name;
 					const colorID = groupID;
-					// if (readingsData.readings === undefined) {
-					// 	throw new Error('Unacceptable condition: readingsData.readings is undefined.');
-					// }
 					// Create two arrays for the distance (rData) and angle (thetaData) values. Fill the array with the data from the line readings.
 					// HoverText is the popup value show for each reading.
 					const thetaData: string[] = [];
@@ -322,6 +323,16 @@ export default function RadarChartComponent() {
 				useResizeHandler={true}
 				config={{
 					displayModeBar: true,
+					modeBarButtonsToRemove: listOfButtons,
+					modeBarButtonsToAdd: [{
+						name: 'toggle-options',
+						title: translate('toggle.options'),
+						icon: Icons.pencil,
+						click: function () {
+							// # of items must differ so the length can tell which list of buttons is being set
+							setListOfButtons(listOfButtons.length === defaultButtons.length ? advancedButtons : defaultButtons); // Update the state
+						}
+					}],
 					responsive: true,
 					locales: Locales // makes locales available for use
 				}}
