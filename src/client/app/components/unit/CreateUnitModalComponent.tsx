@@ -125,7 +125,7 @@ export default function CreateUnitModalComponent() {
 		setValidUnit(
 			state.name !== '' && (state.typeOfUnit !== UnitType.suffix
 				|| state.suffix !== '') && customRateValid(Number(state.secInRate)) &&
-				(canSave || !isCustomRate(state.secInRate))
+				(canSave && isCustomRate(state.secInRate))
 		);
 	}, [state.name, state.secInRate, state.typeOfUnit, state.suffix, canSave]);
 
