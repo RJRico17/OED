@@ -1,4 +1,3 @@
-
 describe("template spec", () => {
 	beforeEach(() => {
 		// Visit the OED application
