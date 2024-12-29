@@ -64,6 +64,8 @@ export default function HeaderButtonsComponent() {
 		shouldCSVReadingsButtonDisabled: true,
 		shouldUnitsButtonDisabled: true,
 		shouldConversionsButtonDisabled: true,
+		shouldLogMsgButtonDisabled: true,
+		shouldVisualUnitMapButtonDisabled: true,
 		// Translated menu title that depend on whether logged in.
 		menuTitle: '',
 		// link to help page for page choices. Should not see default but use general help URL.
@@ -99,7 +101,9 @@ export default function HeaderButtonsComponent() {
 			shouldCSVMetersButtonDisabled: pathname === '/csvMeters',
 			shouldCSVReadingsButtonDisabled: pathname === '/csvReadings',
 			shouldUnitsButtonDisabled: pathname === '/units',
-			shouldConversionsButtonDisabled: pathname === '/conversions'
+			shouldConversionsButtonDisabled: pathname === '/conversions',
+			shouldLogMsgButtonDisabled: pathname === '/logmsg',
+			shouldVisualUnitMapButtonDisabled: pathname === '/visual-unit'
 		}));
 	}, [pathname]);
 
@@ -227,6 +231,13 @@ export default function HeaderButtonsComponent() {
 								to="/units">
 								<FormattedMessage id='units' />
 							</DropdownItem>
+							<DropdownItem
+								style={state.adminViewableLinkStyle}
+								disabled={state.shouldVisualUnitMapButtonDisabled}
+								tag={Link}
+								to="/visual-unit">
+								<FormattedMessage id='visual.unit' />
+							</DropdownItem>
 							<DropdownItem divider style={state.adminViewableLinkStyle} />
 							<DropdownItem
 								style={state.adminViewableLinkStyle}
@@ -234,6 +245,13 @@ export default function HeaderButtonsComponent() {
 								tag={Link}
 								to="/admin">
 								<FormattedMessage id='admin.settings' />
+							</DropdownItem>
+							<DropdownItem
+								style={state.adminViewableLinkStyle}
+								disabled={state.shouldLogMsgButtonDisabled}
+								tag={Link}
+								to="/logmsg">
+								<FormattedMessage id='log.messages' />
 							</DropdownItem>
 							<DropdownItem
 								style={state.adminViewableLinkStyle}
@@ -297,7 +315,7 @@ export default function HeaderButtonsComponent() {
 						{translate('log.in')}
 					</ModalHeader>
 					<ModalBody>
-						<LoginComponent handleClose={handleClose}/>
+						<LoginComponent handleClose={handleClose} />
 					</ModalBody>
 				</Modal>
 			</>
