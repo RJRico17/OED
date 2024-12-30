@@ -77,9 +77,6 @@ export default function CreateConversionModalComponent() {
 		setConversionState(defaultValues);
 	};
 
-	// Unlike edit, we decided to discard and inputs when you choose to leave the page. The reasoning is
-	// that create starts from an empty template.
-
 	// Submit
 	const handleSubmit = () => {
 		if (validConversion) {

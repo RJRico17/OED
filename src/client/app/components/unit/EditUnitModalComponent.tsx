@@ -22,7 +22,7 @@ import { showErrorNotification, showSuccessNotification } from '../../utils/noti
 import ConfirmActionModalComponent from '../ConfirmActionModalComponent';
 import TooltipMarkerComponent from '../TooltipMarkerComponent';
 import { LineGraphRates } from '../../types/redux/graph';
-import { customRateValid } from '../../utils/unitInput';
+import { customRateValid, isCustomRate } from '../../utils/unitInput';
 
 interface EditUnitModalComponentProps {
 	show: boolean;
@@ -49,10 +49,22 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 
 	/* State */
 	// Handlers for each type of input change
+	// Current unit values
 	const [state, setState] = useState(values);
-	const [customRate, setCustomRate] = useState(1);
-	const [showCustomInput, setShowCustomInput] = useState(false);
+	// Stores if save should be allowed but check for use by a meter is delayed until
+	// save is hit to avoid doing a lot and to give error message then.
+	const [canSave, setCanSave] = useState(false);
+	// The rate for the unit
 	const [rate, setRate] = useState(String(state.secInRate));
+	// Holds the value during custom value input and it is separate from standard choices.
+	// Needs to be valid at start and overwritten before used.
+	const [customRate, setCustomRate] = useState(1);
+	// should only update customRate when save all is clicked
+	// This should keep track of rate's value and set custom rate equal to it when custom rate is clicked
+	// True if custom value input is active.
+	const [showCustomInput, setShowCustomInput] = useState(false);
+
+	// State needed to verify input
 	const conversionData = useAppSelector(selectConversionsDetails);
 	const meterDataByID = useAppSelector(selectMeterDataById);
 	const unitDataByID = useAppSelector(selectUnitDataById);
@@ -63,22 +75,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 
 	const handleBooleanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setState({ ...state, [e.target.name]: JSON.parse(e.target.value) });
-	};
-
-	/**
-	 * Determines if the rate is custom.
-	 * @param rate The rate to check
-	 * @returns true if the rate is custom and false if it is a standard value.
-	 */
-	const isCustomRate = (rate: number) => {
-		// Loop over all standard rates to see if the rate is one of these.
-		// If is then return false, otherwise true.
-		return !Object.entries(LineGraphRates).some(
-			([, rateValue]) => {
-				// Since the rateValue is a floating point number and rate is an integer,
-				// round to nearest integer to avoid issues with compare.
-				return Math.round(rateValue * 3600) === rate;
-			});
 	};
 
 	/**
@@ -193,9 +189,6 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 		}
 	};
 
-	// Stores if save should be allowed but check for use by a meter is delayed until
-	// save is hit to avoid doing a lot and to give error message then.
-	const [canSave, setCanSave] = useState(false);
 	// Keeps canSave state up to date. Checks if valid and if edit made.
 	useEffect(() => {
 		// This checks:
@@ -220,6 +213,7 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 			|| props.unit.note !== state.note;
 		setCanSave(validUnit && editMade);
 	}, [state]);
+
 	/* End State */
 
 	// Reset the state to default values
@@ -396,10 +390,18 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										type='select'
 										onChange={e => handleStringChange(e)}
 										value={state.typeOfUnit}
-										invalid={state.typeOfUnit !== UnitType.suffix && state.suffix !== ''}>
+										invalid={state.typeOfUnit !== UnitType.suffix && state.suffix !== ''}
+									>
 										{Object.keys(UnitType).map(key => {
-											return (<option value={key} key={key} disabled={state.suffix !== '' && key !== UnitType.suffix}>
-												{translate(`UnitType.${key}`)}</option>);
+											return (
+												<option
+													value={key}
+													key={key}
+													disabled={state.suffix !== '' && key !== UnitType.suffix}
+												>
+													{translate(`UnitType.${key}`)}
+												</option>
+											);
 										})}
 									</Input>
 									<FormFeedback>
@@ -417,9 +419,13 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										type='select'
 										value={state.unitRepresent}
 										disabled={inConversions()}
-										onChange={e => handleStringChange(e)}>
+										onChange={e => handleStringChange(e)}
+									>
 										{Object.keys(UnitRepresentType).map(key => {
-											return (<option value={key} key={key}>{translate(`UnitRepresentType.${key}`)}</option>);
+											return (
+												<option value={key} key={key}>
+													{translate(`UnitRepresentType.${key}`)}
+												</option>);
 										})}
 									</Input>
 								</FormGroup>
@@ -436,10 +442,23 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										type='select'
 										value={state.displayable}
 										onChange={e => handleStringChange(e)}
-										invalid={state.displayable !== DisplayableType.none && (state.typeOfUnit === UnitType.meter || state.suffix !== '')}>
+										invalid={
+											state.displayable !== DisplayableType.none &&
+											(state.typeOfUnit === UnitType.meter || state.suffix !== '')
+										}
+									>
 										{Object.keys(DisplayableType).map(key => {
-											return (<option value={key} key={key} disabled={(state.typeOfUnit === UnitType.meter || state.suffix !== '') && key !== DisplayableType.none}>
-												{translate(`DisplayableType.${key}`)}</option>);
+											return (<option
+												value={key}
+												key={key}
+												disabled={
+													(state.typeOfUnit === UnitType.meter || state.suffix !== '') &&
+													key !== DisplayableType.none
+												}
+											>
+												{translate(`DisplayableType.${key}`)}
+											</option>
+											);
 										})}
 									</Input>
 									<FormFeedback>
@@ -462,7 +481,11 @@ export default function EditUnitModalComponent(props: EditUnitModalComponentProp
 										value={state.preferredDisplay.toString()}
 										onChange={e => handleBooleanChange(e)}>
 										{Object.keys(TrueFalseType).map(key => {
-											return (<option value={key} key={key}>{translate(`TrueFalseType.${key}`)}</option>);
+											return (
+												<option value={key} key={key}>
+													{translate(`TrueFalseType.${key}`)}
+												</option>
+											);
 										})}
 									</Input>
 								</FormGroup>

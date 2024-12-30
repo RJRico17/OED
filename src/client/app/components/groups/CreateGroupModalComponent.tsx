@@ -178,9 +178,6 @@ export default function CreateGroupModalComponent() {
 		setGraphicUnitsState(graphicUnitsStateDefaults);
 	};
 
-	// Unlike edit, we decided to discard inputs when you choose to leave the page. The reasoning is
-	// that create starts from an empty template.
-
 	// Save changes
 	const handleSubmit = () => {
 		// Close modal first to avoid repeat clicks

@@ -102,9 +102,6 @@ export default function CreateMeterModalComponent(props: CreateMeterModalProps):
 		resetState();
 	};
 
-	// Unlike edit, we decided to discard and inputs when you choose to leave the page. The reasoning is
-	// that create starts from an empty template.
-
 	// Submit
 	const handleSubmit = async () => {
 		// Close modal first to avoid repeat clicks
