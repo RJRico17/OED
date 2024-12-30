@@ -3,6 +3,7 @@
 # * License, v. 2.0. If a copy of the MPL was not distributed with this
 # * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # *
+
 version: "3.8"
 services:
     # Database service. It's PostgreSQL, see the
@@ -82,21 +83,22 @@ services:
         # Use this if you are using a docker-compose that is earlier than version 2 and comment out the one above.
         # command: ["bash", "./src/scripts/installOED.sh"]
 
-          # Cypress testing service
-  cypress:
-    image: cypress/included
-    profiles:
-      - ui-testing
-    environment:
-      - CYPRESS_BASE_URL=http://web:3000
-      - DISPLAY=:99
-    working_dir: /usr/src/app
-    depends_on:
-      web:
-        condition: service_healthy
-    volumes:
-      - ./:/usr/src/app
-    entrypoint: >
-      /bin/sh -c "
-      rm -f /tmp/.X99-lock &&
-      Xvfb :99 -screen 0 1024x768x16"
+    # Cypress testing service
+    cypress:
+      image: cypress/included
+      profiles:
+        - ui-testing
+      environment:
+        - CYPRESS_BASE_URL=http://web:3000
+        - DISPLAY=:99
+      working_dir: /usr/src/app
+      depends_on:
+        web:
+          condition: service_healthy
+      volumes:
+        - ./:/usr/src/app
+      entrypoint: >
+        /bin/sh -c "
+        rm -f /tmp/.X99-lock &&
+        Xvfb :99 -screen 0 1024x768x16"
+        
