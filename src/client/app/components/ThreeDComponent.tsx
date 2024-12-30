@@ -28,6 +28,7 @@ import translate from '../utils/translate';
 import SpinnerComponent from './SpinnerComponent';
 import ThreeDPillComponent from './ThreeDPillComponent';
 import Plot from 'react-plotly.js';
+import { Icons } from 'plotly.js';
 import { selectSelectedLanguage } from '../redux/slices/appStateSlice';
 import Locales from '../types/locales';
 
@@ -45,13 +46,18 @@ export default function ThreeDComponent() {
 	const graphState = useAppSelector(selectGraphState);
 	const locale = useAppSelector(selectSelectedLanguage);
 	const { meterOrGroupID, meterOrGroupName, isAreaCompatible } = useAppSelector(selectThreeDComponentInfo);
-
-
 	// Initialize Default values
 	const threeDData = data;
 	let layout = {};
 	let dataToRender = null;
 
+	// Display Plotly Buttons Feature
+	// The number of items in defaultButtons and advancedButtons must differ as discussed below
+	const defaultButtons: Plotly.ModeBarDefaultButtons[] = ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d',
+		'resetScale2d'];
+	const advancedButtons: Plotly.ModeBarDefaultButtons[] = ['resetCameraDefault3d'];
+	// Manage button states with useState
+	const	[listOfButtons, setListOfButtons] = React.useState(defaultButtons);
 
 	if (!meterOrGroupID) {
 		// No selected Meters
@@ -85,7 +91,17 @@ export default function ThreeDComponent() {
 					layout={layout as Plotly.Layout}
 					config={{
 						responsive: true,
-						displayModeBar: false,
+						displayModeBar: true,
+						modeBarButtonsToRemove: listOfButtons,
+						modeBarButtonsToAdd: [{
+							name: 'more-options',
+							title: translate('toggle.options'),
+							icon: Icons.pencil,
+							click: function () {
+								// # of items must differ so the length can tell which list of buttons is being set
+								setListOfButtons(listOfButtons.length === defaultButtons.length ? advancedButtons : defaultButtons); // Update the state
+							}
+						}],
 						// Current Locale
 						locale,
 						// Available Locales
@@ -115,6 +131,7 @@ function formatThreeDData(
 	graphState: GraphState,
 	unitDataById: UnitDataById
 ) {
+
 	// Initialize Plotly Data
 	const xDataToRender: string[] = [];
 	const yDataToRender: string[] = [];
