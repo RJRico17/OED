@@ -103,8 +103,8 @@ export default function EditConversionModalComponent(props: EditConversionModalC
 	};
 
 	const handleClose = () => {
-		resetState();
 		props.handleClose();
+		resetState();
 	};
 
 	// Save changes
