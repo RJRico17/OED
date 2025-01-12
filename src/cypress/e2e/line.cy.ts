@@ -8,7 +8,9 @@ describe('template spec', () => {
 		cy.visit('/');
 	});
 
-	// Graph Type is Line
+	// Graph Type is Line.
+	// TODO This is the default line type when OED is created but can be changed by the admin. It might be good
+	//      to first set it to this value at some point (but it does make another possible failure).
 	it('should display a line graph type automatically', () => {
 		// Find the line chart
 		cy.get('#root > div:nth-child(2) > div.container-fluid.flexGrowOne > div > div.col-2.d-none.d-lg-block > div > div.dropdown > button').should('have.text', 'Line');
