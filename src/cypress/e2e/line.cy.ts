@@ -2,7 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-describe('template spec', () => {
+// This test is a greate template to start with for understanding testing using cypress.
+describe('testing line graph selecing groups and meters and test for plotly line graph ', () => {
 	beforeEach(() => {
 		// Visit the OED application
 		cy.visit('/');

@@ -7,7 +7,6 @@
     // Visit the OED application
     cy.visit("/");
   });
-
   it("should update the UI and React state when the language is changed", () => {
     // Open the language selection dropdown
 
