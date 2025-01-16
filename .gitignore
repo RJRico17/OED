@@ -58,4 +58,4 @@ nohup.out
 src/server/tmp/*
 
 #ui-testing screenshots
-src/cypress/screenshots/*
+cypress/screenshots/*
