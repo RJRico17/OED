@@ -2,8 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// This test is a greate template to start with for understanding testing using cypress.
-describe('testing line graph selecing groups and meters and test for plotly line graph ', () => {
+ // TODO These tests assume a clean setup/test data. In the future we should wipe the database
+ // and load the needed data (maybe without the actual meter data until needed) in a similar way
+ // to how the Chai/Mocha tests work.
+
+// This test is a great template to start with for understanding testing using cypress.
+describe('testing line graph selecting groups and meters and test for plotly line graph ', () => {
 	beforeEach(() => {
 		// Visit the OED application
 		cy.visit('/');
@@ -19,19 +23,20 @@ describe('testing line graph selecing groups and meters and test for plotly line
 
 	});
 	// Checking all group options
-	it('groups should be clickable and display 10 options and 1 incompatiable option', () => {
+	it('groups should be clickable and display 10 options and 1 incompatible option', () => {
 		// Find and click the group 
 		cy.get('#root > div:nth-child(2) > div.container-fluid.flexGrowOne > div > div.col-2.d-none.d-lg-block > div > div:nth-child(4) > div:nth-child(2) > div > div.css-1fdsijx-ValueContainer').click().should('be.visible');
 		// Check if the 10 options are there
 		cy.get('#react-select-2-listbox > div:nth-child(1) > div:nth-child(2)').children().should('have.length', 10);
 		cy.get('#react-select-2-group-0-heading > div > span.badge.bg-primary.rounded-pill').should('have.text', '10');
-		// check if the incompatiable option is visible and not clickable
+		// check if the incompatible option is visible and not clickable
 		cy.get('#react-select-2-option-1-0').should('exist')
 			.should('have.attr', 'aria-disabled', 'true') // Check the aria-disabled attribute
 			.should('have.attr', 'tabindex', '-1') // Validate tabindex to confirm it’s not focusable
 	});
+	// Checking all meter options
 	it('selecting menu option should display 25 options and plotly graph', () => {
-		//open menu option
+		// open menu option
 		cy.get("#root > div:nth-child(2) > div.container-fluid.flexGrowOne > div > div.col-2.d-none.d-lg-block > div > div:nth-child(4) > div:nth-child(4) > div > div.css-1fdsijx-ValueContainer").click().should('be.visible');
 		// Verify all options
 		cy.get("#react-select-3-listbox > div > div:nth-child(2)").children().should('have.length', 25);
@@ -84,5 +89,4 @@ describe('testing line graph selecing groups and meters and test for plotly line
 		And checking the time interval in which the data is displayed. (From seconds to day...)
 		*/
 	});
-
 });
