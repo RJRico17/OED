@@ -41,7 +41,8 @@ export default function GraphicRateMenuComponent() {
 	const displayOnChartType: ChartTypes[] = [
 		ChartTypes.line,
 		ChartTypes.threeD,
-		ChartTypes.radar
+		ChartTypes.radar,
+		ChartTypes.compareLine
 	];
 
 	if (!displayOnChartType.includes(graphState.chartToRender)) {
