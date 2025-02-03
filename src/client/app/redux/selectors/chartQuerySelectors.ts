@@ -11,7 +11,8 @@ import {
 	selectWidthDays, selectComparePeriod,
 	selectCompareTimeInterval, selectQueryTimeInterval,
 	selectSelectedGroups, selectSelectedMeters,
-	selectSelectedUnit, selectThreeDState
+	selectSelectedUnit, selectThreeDState,
+	selectShiftAmount
 } from '../slices/graphSlice';
 import { omit } from 'lodash';
 import { selectLineChartDeps } from './lineChartSelectors';
@@ -88,7 +89,8 @@ export const selectCompareLineQueryArgs = createSelector(
 	selectSelectedUnit,
 	selectThreeDState,
 	selectLineChartDeps,
-	(queryTimeInterval, selectedUnit, threeD, lineChartDeps) => {
+	selectShiftAmount,
+	(queryTimeInterval, selectedUnit, threeD, lineChartDeps, ShiftAmount) => {
 		const args: CompareLineReadingApiArgs =
 			threeD.meterOrGroup === MeterOrGroup.meters
 				? {
@@ -103,7 +105,7 @@ export const selectCompareLineQueryArgs = createSelector(
 					graphicUnitId: selectedUnit,
 					meterOrGroup: threeD.meterOrGroup!
 				};
-		const shouldSkipQuery = !threeD.meterOrGroupID || !queryTimeInterval.getIsBounded();
+		const shouldSkipQuery = !threeD.meterOrGroupID || !queryTimeInterval.getIsBounded() || ShiftAmount == 'none';
 		const argsDeps = threeD.meterOrGroup === MeterOrGroup.meters ? lineChartDeps.meterDeps : lineChartDeps.groupDeps;
 		return { args, shouldSkipQuery, argsDeps };
 	}
