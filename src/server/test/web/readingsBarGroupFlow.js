@@ -21,7 +21,7 @@ mocha.describe('readings API', () => {
     mocha.describe('readings test, test if data returned by API is as expected', () => {
         mocha.describe('for bar charts', () => {
             mocha.describe('for flow groups', () => {
-                mocha.it('BG15: should have daily points for 15 + 20 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () =>{
+                mocha.it('BG15: 13 day bars for 15 + 20 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () =>{
                     const unitDatakW = [
                         { 
                             // u4
@@ -112,7 +112,7 @@ mocha.describe('readings API', () => {
                     expectReadingToEqualExpected(res, expected, GROUP_ID);
                 });
 
-                mocha.it('BG16: should have daily points for 15 + 20 minute reading intervals and flow units with +-inf start/end time & thing as thing where rate is 36', async () => {
+                mocha.it('BG16: 13 day bars for 15 + 20 minute reading intervals and flow units with +-inf start/end time & thing as thing where rate is 36', async () => {
                     const unitDataThing = [
                         {
                             // u14
