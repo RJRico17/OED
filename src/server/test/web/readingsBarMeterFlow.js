@@ -26,7 +26,7 @@ mocha.describe('readings API', () => {
         mocha.describe('for bar charts', () => {
             mocha.describe('for flow meters', () => {
 
-                mocha.it('B15: should have daily points for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () => {
+                mocha.it('B15: 13 day bars for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () => {
                     const unitData = [
                         {
                             // u4
@@ -95,7 +95,7 @@ mocha.describe('readings API', () => {
                     expectReadingToEqualExpected(res, expected);
                 });
 
-                mocha.it('B16: should have daily points for 15 minute reading intervals and flow units with +-inf start/end time & thing as thing where rate is 36', async () => {
+                mocha.it('B16: 13 day bars for 15 minute reading intervals and flow units with +-inf start/end time & thing as thing where rate is 36', async () => {
                     const unitData = [
                         {
                             // u14
