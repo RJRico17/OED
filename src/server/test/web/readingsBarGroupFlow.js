@@ -202,6 +202,18 @@ mocha.describe('readings API', () => {
                     // Check that the API reading is equal to what it is expected to equal
                     expectReadingToEqualExpected(res, expected, GROUP_ID);
                 });
+
+                // Add BG17 here
+
+                // Add BG18 here
+
+                // Add BG19 here
+
+                // Add BG20 here
+
+                // Add BG21 here
+
+                // Add BG22 here
             });
         });
     });

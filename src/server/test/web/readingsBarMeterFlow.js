@@ -162,7 +162,19 @@ mocha.describe('readings API', () => {
                         });
                     // Check that the API reading is equal to what it is expected to equal
                     expectReadingToEqualExpected(res, expected);
-                });
+
+                // Add B17 here
+
+                // Add B18 here
+
+                // Add B19 here
+
+                // Add B20 here
+
+                // Add B21 here
+
+                // Add B22 here
+            });
             });
         });
     });
