@@ -163,6 +163,14 @@ mocha.describe('readings API', () => {
 					// Check that the API reading is equal to what it is expected to equal
 					expectCompareToEqualExpected(res, expected, METER_ID);
 				})
+
+                // Add C17 here
+
+                // Add C18 here
+
+                // Add C19 here
+
+                // Add C20 here
 			});
 		});
 	});
