@@ -156,6 +156,77 @@ mocha.describe('readings API', () => {
 
 				// Add C9 here
 				// started working on this
+				mocha.it('C9: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and Fahrenheit as Widghet', async () => {
+					// Use predefined unit and conversion data
+					const unitData = [
+						// adding units u7, u8, u9
+						{
+							// u7
+							name: 'Degrees',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.RAW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.METER,
+							suffix: '',
+							displayable: Unit.displayableType.NONE,
+							preferredDisplay: false,
+							note: 'special unit'
+						},
+						{
+							// u8 
+							name: 'F',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.RAW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.UNIT,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: false,
+							note: 'OED created standard unit'
+						}, 
+						{
+							// u9 
+							name: 'Widget',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.RAW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.UNIT,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: false,
+							note: 'fake unit'
+						}
+					];
+					const conversionData = conversionDatakWh.concat([
+						{
+							sourceName: 'F',
+							destinationName: 'Widget',
+							bidirectional: true,
+							slope: 5,
+							intercept: 3,
+							note: 'Fahrenheit → Widget'
+						}
+					]);
+					// Prepare test with the standard data
+					console.log('C9');
+					await prepareTest(unitData, conversionData, meterDatakWh);
+					process.stdout.write(JSON.stringify(unitData));
+					process.stdout.write(JSON.stringify(conversionData));
+					process.stdout.write(JSON.stringify(meterDatakWh));
+					// Get the unit ID since the DB could use any value.
+					const unitId = await getUnitId('Widget');
+					const expected = [15972.58, 17319.62]; 		// how do we calculate this? readings_ri_15_days_75.csv maybe???
+					// for compare, need the unitID, currentStart, currentEnd, shift
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
+						.query({
+							curr_start: '2022-10-31 00:00:00',
+							curr_end: '2022-10-31 17:00:00',
+							shift: 'P1D',
+							graphicUnitId: unitId
+						});
+					expectCompareToEqualExpected(res, expected);
+				});
+
 
 				// Add C10 here
 
