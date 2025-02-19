@@ -270,7 +270,6 @@ mocha.describe('readings API', () => {
 							shift: 'P1D',
 							graphicUnitId: unitID
 						});
-
 					expectCompareToEqualExpected(res, expected);
 				});
 
