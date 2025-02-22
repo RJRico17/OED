@@ -156,66 +156,36 @@ mocha.describe('readings API', () => {
 
 				// Add C9 here
 				// started working on this
-				mocha.it('C9: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and Fahrenheit as Widghet', async () => {
-					// Use predefined unit and conversion data
-					const unitData = [
-						// adding units u7, u8, u9
+				mocha.it('C9: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as MJ reverse conversion', async () => {
+					// add u3 to existing unitData
+					const unitData = unitDatakWh.concat([
 						{
-							// u7
-							name: 'Degrees',
-							identifier: '',
-							unitRepresent: Unit.unitRepresentType.RAW,
-							secInRate: 3600,
-							typeOfUnit: Unit.unitType.METER,
-							suffix: '',
-							displayable: Unit.displayableType.NONE,
-							preferredDisplay: false,
-							note: 'special unit'
-						},
-						{
-							// u8 
-							name: 'F',
-							identifier: '',
-							unitRepresent: Unit.unitRepresentType.RAW,
+							name: 'MJ',
+							identifier: 'megaJoules',
+							unitRepresent: Unit.unitRepresentType.QUANTITY,
 							secInRate: 3600,
 							typeOfUnit: Unit.unitType.UNIT,
 							suffix: '',
 							displayable: Unit.displayableType.ALL,
 							preferredDisplay: false,
-							note: 'OED created standard unit'
-						}, 
-						{
-							// u9 
-							name: 'Widget',
-							identifier: '',
-							unitRepresent: Unit.unitRepresentType.RAW,
-							secInRate: 3600,
-							typeOfUnit: Unit.unitType.UNIT,
-							suffix: '',
-							displayable: Unit.displayableType.ALL,
-							preferredDisplay: false,
-							note: 'fake unit'
-						}
-					];
-					const conversionData = conversionDatakWh.concat([
-						{
-							sourceName: 'F',
-							destinationName: 'Widget',
-							bidirectional: true,
-							slope: 5,
-							intercept: 3,
-							note: 'Fahrenheit → Widget'
+							note: 'MJ'
 						}
 					]);
-					// Prepare test with the standard data
-					console.log('C9');
+					// add c2 to existing conversionData
+					const conversionData = conversionDatakWh.concat([
+						{
+							sourceName: 'kWh',
+							destinationName: 'MJ',
+							bidirectional: true,
+							slope: 3.6,
+							intercept: 0,
+							note: 'kWh → MJ'
+						}
+					]);
 					await prepareTest(unitData, conversionData, meterDatakWh);
-					process.stdout.write(JSON.stringify(unitData));
-					process.stdout.write(JSON.stringify(conversionData));
-					process.stdout.write(JSON.stringify(meterDatakWh));
 					// Get the unit ID since the DB could use any value.
-					const unitId = await getUnitId('Widget');
-					const expected = [15972.58, 17319.62]; 		// how do we calculate this? readings_ri_15_days_75.csv maybe???
+					const unitId = await getUnitId('MJ');
+					const expected = [11232.0660730344, 12123.0051081528]; 
 					// for compare, need the unitID, currentStart, currentEnd, shift
 					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
 						.query({
