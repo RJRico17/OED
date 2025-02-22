@@ -159,7 +159,7 @@ mocha.describe('readings API', () => {
 				// Add C10 here
 
 				mocha.it('C11: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as BTU reverse conversion', async () => {
-					const unitData = [
+					const unitData = unitDatakWh.concat([
 						// adding units u1, u2, u3, u16
 						{
 							//u1
@@ -205,9 +205,9 @@ mocha.describe('readings API', () => {
 							preferredDisplay: true, 
 							note: 'OED created standard unit'
 						},
-					];
-					const conversionData = [
-						// adding conversions c1, c2, c3
+					]);
+					const conversionData = conversionDatakWh.concat([
+						// adding conversions c1, c6, c3
 						{
 							// c1
 							sourceName: 'Electric_Utility', 
@@ -218,13 +218,13 @@ mocha.describe('readings API', () => {
 							note: 'Electric_Utility → kWh' 
 						},
 						{
-							// c2
-							sourceName: 'kWh', 
-							destinationName: 'MJ', 
-							bidirectional: true, 
-							slope: 3.6, 
-							intercept: 0, 
-							note: 'kWh → MJ'
+							// c6
+							sourceName: 'MJ',
+							destinationName: 'kWh',
+							bidirectional: true,
+							slope: 1 / 3.6,
+							intercept: 0,
+							note: 'MJ → KWh'
 						},
 						{
 							// c3
@@ -236,7 +236,7 @@ mocha.describe('readings API', () => {
 							note: 'MJ → BTU' 
 						},
 	
-					];
+					]);
 					// redefining the meterData as the unit is different
 					const meterData = [
 						{
