@@ -261,7 +261,6 @@ mocha.describe('readings API', () => {
                     expectReadingToEqualExpected(res, expected);
                 });
 
-                // Add B10 here
                 mocha.it('B10: 1 day bars for 15 minute reading intervals and quantity units with +-inf start/end time & kWh as BTU', async () => {
                     // Load the data into the database
                     const unitData = unitDatakWh.concat([
