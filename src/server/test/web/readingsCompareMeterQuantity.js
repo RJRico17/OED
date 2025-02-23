@@ -154,7 +154,47 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected);
 				});
 
-				// Add C9 here
+				mocha.it('C9: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as MJ reverse conversion', async () => {
+					// add u3 to existing unitData
+					const unitData = unitDatakWh.concat([
+						{
+							name: 'MJ',
+							identifier: 'megaJoules',
+							unitRepresent: Unit.unitRepresentType.QUANTITY,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.UNIT,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: false,
+							note: 'MJ'
+						}
+					]);
+					// add c2 to existing conversionData
+					const conversionData = conversionDatakWh.concat([
+						{
+							sourceName: 'MJ',
+							destinationName: 'kWh',
+							bidirectional: true,
+							slope: 1 / 3.6,
+							intercept: 0,
+							note: 'MJ → kWh'
+						}
+					]);
+					await prepareTest(unitData, conversionData, meterDatakWh);
+					// Get the unit ID since the DB could use any value.
+					const unitId = await getUnitId('MJ');
+					const expected = [11232.0660730344, 12123.0051081528]; 
+					// for compare, need the unitID, currentStart, currentEnd, shift
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
+						.query({
+							curr_start: '2022-10-31 00:00:00',
+							curr_end: '2022-10-31 17:00:00',
+							shift: 'P1D',
+							graphicUnitId: unitId
+						});
+					expectCompareToEqualExpected(res, expected);
+				});
+
 
 				// Add C10 here
 
