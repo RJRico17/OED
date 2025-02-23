@@ -172,12 +172,12 @@ mocha.describe('readings API', () => {
 					// add c2 to existing conversionData
 					const conversionData = conversionDatakWh.concat([
 						{
-							sourceName: 'kWh',
-							destinationName: 'MJ',
+							sourceName: 'MJ',
+							destinationName: 'kWh',
 							bidirectional: true,
-							slope: 3.6,
+							slope: 1 / 3.6,
 							intercept: 0,
-							note: 'kWh → MJ'
+							note: 'MJ → kWh'
 						}
 					]);
 					await prepareTest(unitData, conversionData, meterDatakWh);
