@@ -164,7 +164,7 @@ mocha.describe('readings API', () => {
                     expectReadingToEqualExpected(res, expected);
                 });
 
-                mocha.it('B17: should have daily points for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW for Electric meter', async () => {
+                mocha.it('B17: 1 day bars for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () => {
                     const unitData = [
                         {
                             // u4
