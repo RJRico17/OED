@@ -173,9 +173,6 @@ mocha.describe('readings API', () => {
                 // Add B20 here
 
                 // Add B21 here
-
-                // Add B22 here
-
                 
                 mocha.it('B22: 13 day bars for 15 minute reading intervals and quantity units with reduced, partial days & kWh as kWh', async () => {
                     const unitData = [
