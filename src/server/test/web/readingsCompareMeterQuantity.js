@@ -159,30 +159,9 @@ mocha.describe('readings API', () => {
 				mocha.it('C10: 1 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and quantity units & kWh as BTU', async () => {
 					// Use predefined unit and conversion data
 					const unitData = unitDatakWh.concat([
-						//adding u1, u2, u3, u16
-						{ 	//u1
-							name: 'kWh',
-							identifier: '',
-							unitRepresent: Unit.unitRepresentType.QUANTITY,
-							secInRate: 3600,
-							typeOfUnit: Unit.unitType.UNIT,
-							suffix: '',
-							displayable: Unit.displayableType.ALL,
-							preferredDisplay: false,
-							note: 'OED created standard unit'
-						},							
-						{	//u2
-							name: 'Electric_Utility',
-							identifier: '',
-							unitRepresent: Unit.unitRepresentType.QUANTITY,
-							secInRate: 3600,
-							typeOfUnit: Unit.unitType.METER,
-							suffix: '',
-							displayable: Unit.displayableType.NONE,
-							preferredDisplay: false,
-							note: 'special unit'
-						},
-						{	//u3
+						//adding u3, u16
+						{	
+							// u3
 							name: 'MJ',
 							identifier: 'megaJoules',
 							unitRepresent: Unit.unitRepresentType.QUANTITY,
@@ -193,7 +172,8 @@ mocha.describe('readings API', () => {
 							preferredDisplay: false,
 							note: 'MJ'
 						},
-						{ 	// u16
+						{ 	
+							// u16
 							name: 'BTU',
 							identifier: '',
 							unitRepresent: Unit.unitRepresentType.QUANTITY,
@@ -206,16 +186,9 @@ mocha.describe('readings API', () => {
 						}
 					]);
 					const conversionData = conversionDatakWh.concat([
-						// adding c1, c2, c3
-						{	// c1
-							sourceName: 'Electric_Utility',
-							destinationName: 'kWh',
-							bidirectional: false,
-							slope: 1,
-							intercept: 0,
-							note: 'Electric_Utility → kWh'
-						},
-						{	// c2
+						// adding c2, c3
+						{	
+							// c2
 							sourceName: 'kWh',
 							destinationName: 'MJ',
 							bidirectional: true,
@@ -223,7 +196,8 @@ mocha.describe('readings API', () => {
 							intercept: 0,
 							note: 'MJ → BTU'
 						},
-						{	//c3
+						{	
+							// c3
 							sourceName: 'MJ',
 							destinationName: 'BTU',
 							bidirectional: true,
