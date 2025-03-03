@@ -27,7 +27,7 @@ mocha.describe('readings API', () => {
             mocha.describe('for flow meters', () => {
 
                 mocha.it('B15: 13 day bars for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () => {
-                    console.log("test change")
+                
 					const unitData = [
                         {
                             // u4
