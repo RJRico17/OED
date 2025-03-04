@@ -260,7 +260,6 @@ mocha.describe("readings API", () => {
 
 					// Add B20 here
 
-					// Add B21 here
 					mocha.it(
 						"B21: 76 day bars (no values) for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW",
 						async () => {
@@ -336,7 +335,6 @@ mocha.describe("readings API", () => {
 							expectReadingToEqualExpected(res, expected);
 						}
 					);
-
 					mocha.it(
 						"B22: 13 day bars for 15 minute reading intervals and quantity units with reduced, partial days & kWh as kWh",
 						async () => {
