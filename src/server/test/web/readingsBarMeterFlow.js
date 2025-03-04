@@ -27,7 +27,6 @@ mocha.describe('readings API', () => {
             mocha.describe('for flow meters', () => {
 
                 mocha.it('B15: 13 day bars for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () => {
-                
 					const unitData = [
                         {
                             // u4
@@ -169,7 +168,6 @@ mocha.describe('readings API', () => {
 
                 // Add B18 here
 
-                // Add B19 here
 				mocha.it('B19: 28 day bars for 15 minute reading intervals and flow units with +-inf start/end time & kW as kW', async () => {
                     const unitData = [
                         {
@@ -238,7 +236,6 @@ mocha.describe('readings API', () => {
                     // Check that the API reading is equal to what it is expected to equal
                     expectReadingToEqualExpected(res, expected);
                 });
-
 
                 // Add B20 here
 
