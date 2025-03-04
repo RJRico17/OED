@@ -164,13 +164,13 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected, METER_ID);
 				})
 
-                // Add C17 here
+				// Add C17 here
 
-                // Add C18 here
+				// Add C18 here
 
-                // Add C19 here
+				// Add C19 here
 
-                // Add C20 here
+				// Add C20 here
 			});
 		});
 	});
