@@ -11,7 +11,8 @@ const Unit = require('../../models/Unit');
 const { prepareTest,
 	expectCompareToEqualExpected,
 	getUnitId,
-	METER_ID } = require('../../util/readingsUtils');
+	METER_ID, 
+	unitDatakWh} = require('../../util/readingsUtils');
 
 mocha.describe('readings API', () => {
 	mocha.describe('readings test, test if data returned by API is as expected', () => {
@@ -166,7 +167,103 @@ mocha.describe('readings API', () => {
 
                 // Add C17 here
 
+				/**
+				 * { name: 'kW', 
+				 * identifier: '', 
+				 * unitRepresent: Unit.unitRepresentType.FLOW, 
+				 * secInRate: 3600, 
+				 * typeOfUnit: Unit.unitType.UNIT, 
+				 * suffix: '', 
+				 * displayable: Unit.displayableType.ALL, 
+				 * preferredDisplay: true, 
+				 * note: 'kilowatts' 
+				 * }
+				 * 
+				 * 
+				 * U5:     
+				 * { 
+				 * name: 'Electric', 
+				 * identifier: '', 
+				 * unitRepresent: 
+				 * Unit.unitRepresentType.FLOW, 
+				 * secInRate: 3600, 
+				 * typeOfUnit: Unit.unitType.METER, suffix: '', 
+				 * displayable: Unit.displayableType.NONE, 
+				 * preferredDisplay: false, 
+				 * note: 'special unit' 
+				 * }
+
+				 */
                 // Add C18 here
+				mocha.it('C18: 28 day shift for 26 days for 15 minute reading intervals and flow units & kW as kW', async () =>{
+					unitData = [ //**Unsure about the name**
+						{
+							//U4
+							name: 'kW',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.FLOW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.UNIT,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: true,
+							note: 'kilowatts'
+						},
+						{
+							//U5
+							name: 'Electric',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.FLOW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.METER,
+							suffix: '',
+							displayable: Unit.displayableType.NONE,
+							preferredDisplay: false,
+							note: 'special unit'
+						},
+					];
+					conversionData = [
+						{
+							//C4
+							sourceName: 'Electric',
+							destinationName: 'kW',
+							bidirectional: false,
+							slope: 1,
+							intercept: 0,
+							note: 'Electric → kW'
+						}
+					];
+
+					const meterData = [
+						{
+							name: 'Electric kW',
+							unit: 'Electric',
+							defaultGraphicUnit: 'Kw',
+							displayable: true,
+							gps: undefined,
+							note: 'special meter',
+							file: 'test/web/readingsData/readings_ri_15_days_75.csv',
+							deleteFile: false,
+							readingFrequency: '15 minutes',
+							id: METER_ID
+						}
+					];
+
+					
+					await prepareTest(unitData, conversionData, meterData);
+
+					//getting the unit ID
+					const unitId = await getUnitId('kW');
+
+					//expected values
+					const expected = [30830.9420431404, 31064.5397007187];    
+
+
+					
+					// Check that the API reading is equal to what it is expected to equal
+					expectCompareToEqualExpected(res, expected, METER_ID);
+
+				})
 
                 // Add C19 here
 
