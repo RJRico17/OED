@@ -256,11 +256,13 @@ mocha.describe('readings API', () => {
 
 					//expected values
 					const expected = [30830.9420431404, 31064.5397007187];    
+
+
 					
 					// Check that the API reading is equal to what it is expected to equal
 					expectCompareToEqualExpected(res, expected, METER_ID);
 
-				})
+				});
 
                 // Add C19 here
 
