@@ -238,7 +238,7 @@ mocha.describe('readings API', () => {
 						{
 							name: 'Electric kW',
 							unit: 'Electric',
-							defaultGraphicUnit: 'Kw',
+							defaultGraphicUnit: 'kW',
 							displayable: true,
 							gps: undefined,
 							note: 'special meter',
