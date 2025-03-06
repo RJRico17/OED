@@ -20,7 +20,7 @@ mocha.describe('readings API', () => {
 			mocha.describe('for meters', () => {
 				mocha.it('C15: 7 day shift end 2022-10-31 17:00:00 for 15 minute reading intervals and flow units & kW as kW', async () => {
 					const unitData = [
-						{
+						{ 
 							// u4
 							name: 'kW',
 							identifier: '',
