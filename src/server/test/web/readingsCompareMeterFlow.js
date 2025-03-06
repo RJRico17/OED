@@ -164,7 +164,11 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected, METER_ID);
 				});
 
+<<<<<<< HEAD
 				// Add C17 here
+=======
+                // Add C17 here
+>>>>>>> origin/Gabby_Branch
 				mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
 
 					// Units and Conversions
@@ -207,6 +211,7 @@ mocha.describe('readings API', () => {
 						}
 					];
 
+<<<<<<< HEAD
 					const meterDataElectric = [
 						{
 							name: 'Electric kW',
@@ -222,8 +227,15 @@ mocha.describe('readings API', () => {
 						}
 					];
 
+					await prepareTest(unitData, conversionData, meterDataElectric);
+					const unitId = await getUnitId('kW');
+					const expected = [1210.55315436926, 1349.13987250313];
+
+
+
 					expectCompareToEqualExpected(res, expected);
 				});
+
 
 				// Add C18 here
 
