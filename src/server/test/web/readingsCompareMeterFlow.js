@@ -258,8 +258,6 @@ mocha.describe('readings API', () => {
 					//expected values
 					const expected = [30830.9420431404, 31064.5397007187];    
 
-
-
 					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
 						.query({
 							curr_start: '2022-10-02 00:00:00',
@@ -267,12 +265,11 @@ mocha.describe('readings API', () => {
 							shift: 'P28D',
 							graphicUnitId: unitId
 						});
-
 					
 					// Check that the API reading is equal to what it is expected to equal
 					expectCompareToEqualExpected(res, expected, METER_ID);
 
-				});
+				})
 
                 // Add C19 here
 
