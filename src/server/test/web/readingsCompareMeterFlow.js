@@ -168,6 +168,18 @@ mocha.describe('readings API', () => {
 				mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
 					const unitData = [
 						{
+							// u4
+							name: 'kW',
+							identifier: '',
+							unitRepresent: unitRepresentType.Flow,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.Unit,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: true,
+							note: 'kilowatts'
+						},
+						{
 							// u5
 							name: 'Electric',
 							identifier: '',
@@ -181,6 +193,7 @@ mocha.describe('readings API', () => {
 						}
 					];
 				});
+                         
                 // Add C18 here
 
                 // Add C19 here
