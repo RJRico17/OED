@@ -238,7 +238,7 @@ mocha.describe('readings API', () => {
 						{
 							name: 'Electric kW',
 							unit: 'Electric',
-							defaultGraphicUnit: 'Kw',
+							defaultGraphicUnit: 'kW',
 							displayable: true,
 							gps: undefined,
 							note: 'special meter',
@@ -259,11 +259,20 @@ mocha.describe('readings API', () => {
 					const expected = [30830.9420431404, 31064.5397007187];    
 
 
+
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
+						.query({
+							curr_start: '2022-10-02 00:00:00',
+							curr_end: '2022-10-28 00:00:00',
+							shift: 'P28D',
+							graphicUnitId: unitId
+						});
+
 					
 					// Check that the API reading is equal to what it is expected to equal
 					expectCompareToEqualExpected(res, expected, METER_ID);
 
-				})
+				});
 
                 // Add C19 here
 
