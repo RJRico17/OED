@@ -206,6 +206,23 @@ mocha.describe('readings API', () => {
 							note: 'Electric → kW'
 						}
 					];
+
+					const meterDataElectric = [
+						{
+							name: 'Electric kW',
+							unit: 'Electric',
+							defaultGraphicUnit: 'kW',
+							displayable: true,
+							gps: undefined,
+							note: 'special meter',
+							file: 'test/web/readingsData/readings_ri_15_days_75.csv',
+							deleteFile: false,
+							readingFrequency: '15 minutes',
+							id: METER_ID
+						}
+					];
+
+					expectCompareToEqualExpected(res, expected);
 				});
 
 				// Add C18 here
