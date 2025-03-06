@@ -165,10 +165,21 @@ mocha.describe('readings API', () => {
 				})
 
 				// Add C17 here
-
 				mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
-
-
+					const unitData = [
+						{
+							// u5
+							name: 'Electric',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.FLOW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.METER,
+							suffix: '',
+							displayable: Unit.displayableType.NONE,
+							preferredDisplay: false,
+							note: 'special unit'
+						}
+					];
 
 					const conversionDataElectric = [
 						{
@@ -181,7 +192,13 @@ mocha.describe('readings API', () => {
 							note: 'Electric → kW'
 						}
 					];
-				})
+				});
+
+
+
+
+
+
 
 				// Add C18 here
 
