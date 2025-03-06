@@ -182,7 +182,24 @@ mocha.describe('readings API', () => {
                               note: 'kilowatts'
                          },
                     ]
+
+                    const unitData = [
+                         {
+                              // u5
+                              name: 'Electric',
+                              identifier: '',
+                              unitRepresent: Unit.unitRepresentType.FLOW,
+                              secInRate: 3600,
+                              typeOfUnit: Unit.unitType.METER,
+                              suffix: '',
+                              displayable: Unit.displayableType.NONE,
+                              preferredDisplay: false,
+                              note: 'special unit'
+                         }
+                    ];
+
                 });
+
 
                 // Add C18 here
 
