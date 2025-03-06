@@ -164,6 +164,7 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected, METER_ID);
 				})
 
+<<<<<<< HEAD
                 // Add C17 here
                 mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
                     // Units and Conversions
@@ -200,12 +201,32 @@ mocha.describe('readings API', () => {
 
                 });
 
+=======
+				// Add C17 here
+>>>>>>> origin/brady_first_branch
 
-                // Add C18 here
+				mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
 
-                // Add C19 here
 
-                // Add C20 here
+
+					const conversionDataElectric = [
+						{
+							// c4
+							sourceName: 'Electric',
+							destinationName: 'kW',
+							bidirectional: false,
+							slope: 1,
+							intercept: 0,
+							note: 'Electric → kW'
+						}
+					];
+				})
+
+				// Add C18 here
+
+				// Add C19 here
+
+				// Add C20 here
 			});
 		});
 	});
