@@ -196,7 +196,7 @@ mocha.describe('readings API', () => {
 				 */
                 // Add C18 here
 				mocha.it('C18: 28 day shift for 26 days for 15 minute reading intervals and flow units & kW as kW', async () =>{
-					unitData = [ //**Unsure about the name**
+					unitData = [ 
 						{
 							//U4
 							name: 'kW',
@@ -249,7 +249,6 @@ mocha.describe('readings API', () => {
 						}
 					];
 
-					
 					await prepareTest(unitData, conversionData, meterData);
 
 					//getting the unit ID
@@ -257,8 +256,6 @@ mocha.describe('readings API', () => {
 
 					//expected values
 					const expected = [30830.9420431404, 31064.5397007187];    
-
-
 					
 					// Check that the API reading is equal to what it is expected to equal
 					expectCompareToEqualExpected(res, expected, METER_ID);
