@@ -180,8 +180,6 @@ mocha.describe('readings API', () => {
                               preferredDisplay: true,
                               note: 'kilowatts'
                          },
-                    ]
-                    const unitData = [
                          {
                               // u5
                               name: 'Electric',
@@ -207,6 +205,18 @@ mocha.describe('readings API', () => {
                               note: 'Electric → kW'
                          }
                     ];
+
+
+
+
+
+                    const res = await chai.request(app).get(`api/compareReadings/meters/${METER_ID}`)
+                    .query({
+                         curr_start: '2022-10-30 00:00:00',
+                         curr_end: '2022-10-31 00:00:00',
+                         shift: "P1D",
+                         graphicUnitId: unitId
+                    });
 
                 });
 
