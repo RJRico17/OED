@@ -206,7 +206,22 @@ mocha.describe('readings API', () => {
                          }
                     ];
 
-                    await prepareTest(unitData, conversionData, meterDataElectric);
+                    const meterDataElectric = [
+                         {
+                             name: 'Electric kW',
+                             unit: 'Electric',
+                             defaultGraphicUnit: 'kW',
+                             displayable: true,
+                             gps: undefined,
+                             note: 'special meter',
+                             file: 'test/web/readingsData/readings_ri_15_days_75.csv',
+                             deleteFile: false,
+                             readingFrequency: '15 minutes',
+                             id: METER_ID
+                         }
+                     ];
+
+                    await prepareTest(unitData, conversionDataElectric, meterDataElectric);
 				const unitId = await getUnitId('kW');
 				const expected = [1210.55315436926, 1349.13987250313];
 
