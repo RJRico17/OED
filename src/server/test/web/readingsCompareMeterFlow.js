@@ -225,7 +225,7 @@ mocha.describe('readings API', () => {
 					const unitId = await getUnitId('kW');
 					const expected = [1210.55315436926, 1349.13987250313];
 
-					const res = await chai.request(app).get(`api/compareReadings/meters/${METER_ID}`)
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
 						.query({
 							curr_start: '2022-10-30 00:00:00',
 							curr_end: '2022-10-31 00:00:00',
