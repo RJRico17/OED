@@ -174,7 +174,7 @@ mocha.describe('readings API', () => {
 							identifier: '',
 							unitRepresent: Unit.unitRepresentType.FLOW,
 							secInRate: 3600,
-							typeOfUnit: Unit.unitType.Unit,
+							typeOfUnit: Unit.unitType.UNIT,
 							suffix: '',
 							displayable: Unit.displayableType.ALL,
 							preferredDisplay: true,
