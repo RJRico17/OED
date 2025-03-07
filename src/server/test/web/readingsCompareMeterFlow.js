@@ -221,7 +221,7 @@ mocha.describe('readings API', () => {
 						}
 					];
 
-					await prepareTest(unitData, conversionData, meterDataElectric);
+					await prepareTest(unitData, conversionDataElectric, meterDataElectric);
 					const unitId = await getUnitId('kW');
 					const expected = [1210.55315436926, 1349.13987250313];
 
