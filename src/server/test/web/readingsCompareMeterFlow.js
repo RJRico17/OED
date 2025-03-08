@@ -164,7 +164,6 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected, METER_ID);
 				})
 
-				// Add C17 here
 				mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
 					// Units and Conversions
 					const unitData = [
@@ -172,9 +171,9 @@ mocha.describe('readings API', () => {
 							// u4
 							name: 'kW',
 							identifier: '',
-							unitRepresent: Unit.unitRepresentType.FLOW,
+							unitRepresent: Unit.unitRepresentType.Flow,
 							secInRate: 3600,
-							typeOfUnit: Unit.unitType.UNIT,
+							typeOfUnit: Unit.unitType.Unit,
 							suffix: '',
 							displayable: Unit.displayableType.ALL,
 							preferredDisplay: true,
@@ -208,16 +207,16 @@ mocha.describe('readings API', () => {
 
 					const meterDataElectric = [
 						{
-							name: 'Electric kW',
-							unit: 'Electric',
-							defaultGraphicUnit: 'kW',
-							displayable: true,
-							gps: undefined,
-							note: 'special meter',
-							file: 'test/web/readingsData/readings_ri_15_days_75.csv',
-							deleteFile: false,
-							readingFrequency: '15 minutes',
-							id: METER_ID
+						name: 'Electric kW',
+						unit: 'Electric',
+						defaultGraphicUnit: 'kW',
+						displayable: true,
+						gps: undefined,
+						note: 'special meter',
+						file: 'test/web/readingsData/readings_ri_15_days_75.csv',
+						deleteFile: false,
+						readingFrequency: '15 minutes',
+						id: METER_ID
 						}
 					];
 
@@ -225,13 +224,13 @@ mocha.describe('readings API', () => {
 					const unitId = await getUnitId('kW');
 					const expected = [1210.55315436926, 1349.13987250313];
 
-					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
-						.query({
-							curr_start: '2022-10-30 00:00:00',
-							curr_end: '2022-10-31 00:00:00',
-							shift: "P1D",
-							graphicUnitId: unitId
-						});
+					const res = await chai.request(app).get(`api/compareReadings/meters/${METER_ID}`)
+					.query({
+						curr_start: '2022-10-30 00:00:00',
+						curr_end: '2022-10-31 00:00:00',
+						shift: "P1D",
+						graphicUnitId: unitId
+					});
 
 					expectCompareToEqualExpected(res, expected);
 
