@@ -164,7 +164,7 @@ mocha.describe('readings API', () => {
 					expectCompareToEqualExpected(res, expected, METER_ID);
 				})
 
-					mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
+				mocha.it('C17: 1 full day shift for 15 minute reading intervals and flow units & kW as kW', async () => {
 					// Units and Conversions
 					const unitData = [
 						{
@@ -236,76 +236,76 @@ mocha.describe('readings API', () => {
 
 				});
 
-					mocha.it('C18: 28 day shift for 26 days for 15 minute reading intervals and flow units & kW as kW', async () =>{
-						unitData = [ 
-							{
-								//u4
-								name: 'kW',
-								identifier: '',
-								unitRepresent: Unit.unitRepresentType.FLOW,
-								secInRate: 3600,
-								typeOfUnit: Unit.unitType.UNIT,
-								suffix: '',
-								displayable: Unit.displayableType.ALL,
-								preferredDisplay: true,
-								note: 'kilowatts'
-							},
-							{
-								//u5
-								name: 'Electric',
-								identifier: '',
-								unitRepresent: Unit.unitRepresentType.FLOW,
-								secInRate: 3600,
-								typeOfUnit: Unit.unitType.METER,
-								suffix: '',
-								displayable: Unit.displayableType.NONE,
-								preferredDisplay: false,
-								note: 'special unit'
-							},
-						];
-						conversionData = [
-							{
-								//c4
-								sourceName: 'Electric',
-								destinationName: 'kW',
-								bidirectional: false,
-								slope: 1,
-								intercept: 0,
-								note: 'Electric → kW'
-							}
-						];
-	
-						const meterData = [
-							{
-								name: 'Electric kW',
-								unit: 'Electric',
-								defaultGraphicUnit: 'kW',
-								displayable: true,
-								gps: undefined,
-								note: 'special meter',
-								file: 'test/web/readingsData/readings_ri_15_days_75.csv',
-								deleteFile: false,
-								readingFrequency: '15 minutes',
-								id: METER_ID
-							}
-						];
+				mocha.it('C18: 28 day shift for 26 days for 15 minute reading intervals and flow units & kW as kW', async () =>{
+					unitData = [ 
+						{
+							//u4
+							name: 'kW',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.FLOW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.UNIT,
+							suffix: '',
+							displayable: Unit.displayableType.ALL,
+							preferredDisplay: true,
+							note: 'kilowatts'
+						},
+						{
+							//u5
+							name: 'Electric',
+							identifier: '',
+							unitRepresent: Unit.unitRepresentType.FLOW,
+							secInRate: 3600,
+							typeOfUnit: Unit.unitType.METER,
+							suffix: '',
+							displayable: Unit.displayableType.NONE,
+							preferredDisplay: false,
+							note: 'special unit'
+						},
+					];
+					conversionData = [
+						{
+							//c4
+							sourceName: 'Electric',
+							destinationName: 'kW',
+							bidirectional: false,
+							slope: 1,
+							intercept: 0,
+							note: 'Electric → kW'
+						}
+					];
 
-						await prepareTest(unitData, conversionData, meterData);
-						const unitId = await getUnitId('kW');
-						const expected = [30830.9420431404, 31064.5397007187];    
+					const meterData = [
+						{
+							name: 'Electric kW',
+							unit: 'Electric',
+							defaultGraphicUnit: 'kW',
+							displayable: true,
+							gps: undefined,
+							note: 'special meter',
+							file: 'test/web/readingsData/readings_ri_15_days_75.csv',
+							deleteFile: false,
+							readingFrequency: '15 minutes',
+							id: METER_ID
+						}
+					];
 
-						const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
-							.query({
-								curr_start: '2022-10-02 00:00:00',
-								curr_end: '2022-10-28 00:00:00',
-								shift: 'P28D',
-								graphicUnitId: unitId
-							});
-						
-						expectCompareToEqualExpected(res, expected, METER_ID);
+					await prepareTest(unitData, conversionData, meterData);
+					const unitId = await getUnitId('kW');
+					const expected = [30830.9420431404, 31064.5397007187];    
+
+					const res = await chai.request(app).get(`/api/compareReadings/meters/${METER_ID}`)
+						.query({
+							curr_start: '2022-10-02 00:00:00',
+							curr_end: '2022-10-28 00:00:00',
+							shift: 'P28D',
+							graphicUnitId: unitId
+						});
+					
+					expectCompareToEqualExpected(res, expected, METER_ID);
+
+				});
 	
-					});
-		
 				// Add C19 here
 
 				// Add C20 here
